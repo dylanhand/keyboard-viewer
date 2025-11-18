@@ -27,9 +27,6 @@ export function Key({ keyData, onClick }: KeyProps) {
     height: `${height * baseHeight}rem`,
   };
 
-  // Special styling for ISO Enter key (backwards L shape)
-  const isISOEnter = keyData.id === "Enter" && height > 1;
-
   return (
     <button
       onClick={handleClick}
@@ -52,7 +49,6 @@ export function Key({ keyData, onClick }: KeyProps) {
         ${type === "modifier" ? "bg-gray-50 text-gray-600 font-semibold" : ""}
         ${type === "space" ? "bg-gray-50" : ""}
         ${type === "function" ? "bg-blue-50 text-blue-700 text-xs" : ""}
-        ${isISOEnter ? "iso-enter" : ""}
       `}
       title={keyData.id}
     >
