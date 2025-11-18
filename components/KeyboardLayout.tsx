@@ -15,28 +15,64 @@ export function KeyboardLayout({ layout, onKeyClick }: KeyboardLayoutProps) {
 
   // Find the ISO Enter key and calculate its position
   let enterKeyInfo:
-    | { rowIndex: number; leftOffset: number; enterKey: KeyType }
+    | { rowIndex: number; leftOffset: number; width: number; enterKey: KeyType }
     | null = null;
 
+  // First, find the Enter key and calculate max row width
+  let enterKeyRowIndex = -1;
+  let maxRowWidth = 0;
+
   layout.rows.forEach((row, rowIndex) => {
-    let currentOffset = (row.offset ?? 0) * (baseWidth + gap);
+    const rowOffset = (row.offset ?? 0) * (baseWidth + gap);
+    let rowWidth = rowOffset;
+    const numGaps = row.keys.length - 1;
 
-    for (let keyIndex = 0; keyIndex < row.keys.length; keyIndex++) {
-      const key = row.keys[keyIndex];
-
+    row.keys.forEach((key) => {
       if (key.id === "Enter" && key.height && key.height > 1) {
-        // Found the ISO Enter - save its position and the key itself
-        enterKeyInfo = { rowIndex, leftOffset: currentOffset, enterKey: key };
-        break; // Don't process further keys in this row
+        enterKeyRowIndex = rowIndex;
       }
+      rowWidth += (key.width ?? 1.0) * baseWidth;
+    });
+    rowWidth += numGaps * gap;
 
-      // Add this key's width and the gap after it
-      currentOffset += (key.width ?? 1.0) * baseWidth;
-      if (keyIndex < row.keys.length - 1) {
-        currentOffset += gap;
-      }
+    if (rowWidth > maxRowWidth) {
+      maxRowWidth = rowWidth;
     }
   });
+
+  // If we found an Enter key, position it at the end of the next row (ASDF)
+  // (The asdf row is longer than the qwerty row, so use it to prevent overlap)
+  if (enterKeyRowIndex !== -1) {
+    const asdfRowIndex = enterKeyRowIndex + 1; // ASDF row is one below QWERTY
+    const asdfRow = layout.rows[asdfRowIndex];
+
+    if (asdfRow) {
+      // Calculate ASDF row width (without Enter)
+      const rowOffset = (asdfRow.offset ?? 0) * (baseWidth + gap);
+      let asdfRowWidth = rowOffset;
+      const numGaps = asdfRow.keys.length - 1;
+
+      asdfRow.keys.forEach((key) => {
+        asdfRowWidth += (key.width ?? 1.0) * baseWidth;
+      });
+      asdfRowWidth += numGaps * gap;
+
+      // Enter key width is the difference
+      const enterWidth = (maxRowWidth - asdfRowWidth - gap) / baseWidth;
+      const enterKey = layout.rows[enterKeyRowIndex].keys.find((k) =>
+        k.id === "Enter"
+      );
+
+      if (enterKey) {
+        enterKeyInfo = {
+          rowIndex: enterKeyRowIndex,
+          leftOffset: asdfRowWidth + gap,
+          width: enterWidth,
+          enterKey: { ...enterKey, width: enterWidth },
+        };
+      }
+    }
+  }
 
   return (
     <div class="inline-block p-4 bg-gray-200 rounded-lg shadow-lg">
