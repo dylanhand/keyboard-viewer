@@ -13,6 +13,19 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
   const isShiftActive = useSignal(false);
   const shiftClickMode = useSignal(false); // true if shift was clicked, false if held
 
+  // Helper: Check if a key is a Shift key
+  const isShiftKey = (key: Key): boolean => {
+    return key.id === "ShiftLeft" || key.id === "ShiftRight";
+  };
+
+  // Helper: Exit shift mode if in click mode (one-shot shift)
+  const exitShiftClickMode = () => {
+    if (shiftClickMode.value) {
+      isShiftActive.value = false;
+      shiftClickMode.value = false;
+    }
+  };
+
   // Find a key in the layout by its physical key code
   const findKeyByCode = (code: string): Key | undefined => {
     for (const row of layout.rows) {
@@ -37,7 +50,7 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
         pressedKeyId.value = key.id;
 
         // Handle Shift key specially - activate shift mode but don't call handleKeyClick
-        if (key.id === "ShiftLeft" || key.id === "ShiftRight") {
+        if (isShiftKey(key)) {
           isShiftActive.value = true;
           shiftClickMode.value = false; // Physical hold, not click
           return;
@@ -55,7 +68,7 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
       const key = findKeyByCode(e.code);
 
       // If releasing Shift and not in click mode, deactivate shift
-      if (key && (key.id === "ShiftLeft" || key.id === "ShiftRight") && !shiftClickMode.value) {
+      if (key && isShiftKey(key) && !shiftClickMode.value) {
         isShiftActive.value = false;
       }
 
@@ -73,7 +86,7 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
   const handleKeyClick = (key: Key) => {
     // Handle Shift key clicks
-    if (key.id === "ShiftLeft" || key.id === "ShiftRight") {
+    if (isShiftKey(key)) {
       isShiftActive.value = !isShiftActive.value;
       shiftClickMode.value = isShiftActive.value; // Only set clickMode when toggling on
       return;
@@ -81,35 +94,20 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
     // Handle special keys
     if (key.id === "Backspace") {
-      // Remove last character
       text.value = text.value.slice(0, -1);
-      // Exit shift mode if in click mode
-      if (shiftClickMode.value) {
-        isShiftActive.value = false;
-        shiftClickMode.value = false;
-      }
+      exitShiftClickMode();
       return;
     }
 
     if (key.id === "Enter") {
-      // Add newline
       text.value += "\n";
-      // Exit shift mode if in click mode
-      if (shiftClickMode.value) {
-        isShiftActive.value = false;
-        shiftClickMode.value = false;
-      }
+      exitShiftClickMode();
       return;
     }
 
     if (key.id === "Tab") {
-      // Add tab
       text.value += "\t";
-      // Exit shift mode if in click mode
-      if (shiftClickMode.value) {
-        isShiftActive.value = false;
-        shiftClickMode.value = false;
-      }
+      exitShiftClickMode();
       return;
     }
 
@@ -123,10 +121,7 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
     text.value += charToAdd;
 
     // Exit shift mode if in click mode (one-shot shift)
-    if (shiftClickMode.value) {
-      isShiftActive.value = false;
-      shiftClickMode.value = false;
-    }
+    exitShiftClickMode();
   };
 
   const handleClear = () => {
