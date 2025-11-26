@@ -5,16 +5,24 @@ interface KeyProps {
   onClick?: (key: KeyType) => void;
   isPressed?: boolean;
   isShiftActive?: boolean;
+  isCapsLockActive?: boolean;
 }
 
-export function Key({ keyData, onClick, isPressed, isShiftActive }: KeyProps) {
+export function Key({ keyData, onClick, isPressed, isShiftActive, isCapsLockActive }: KeyProps) {
   const width = keyData.width ?? 1.0;
   const height = keyData.height ?? 1.0;
   const type = keyData.type ?? "normal";
 
-  // Determine which label to show based on shift state
+  // Determine which label to show based on shift and caps lock state
   let label: string;
-  if (isShiftActive && keyData.shiftLabel) {
+  // Use Unicode property escape to match all lowercase letters (including accented and non-Latin)
+  const isLetter = keyData.output.length === 1 && /\p{Ll}/u.test(keyData.output);
+
+  if (isLetter) {
+    // For letters, show uppercase if caps lock XOR shift is active
+    const shouldBeUppercase = isCapsLockActive !== isShiftActive;
+    label = shouldBeUppercase ? keyData.output.toUpperCase() : keyData.output;
+  } else if (isShiftActive && keyData.shiftLabel) {
     label = keyData.shiftLabel;
   } else if (isShiftActive && keyData.shiftOutput) {
     label = keyData.shiftOutput;
@@ -24,6 +32,9 @@ export function Key({ keyData, onClick, isPressed, isShiftActive }: KeyProps) {
 
   // Check if this is a Shift key
   const isShiftKey = keyData.id === "ShiftLeft" || keyData.id === "ShiftRight";
+
+  // Check if this is the Caps Lock key
+  const isCapsLockKey = keyData.id === "CapsLock";
 
   const handleClick = () => {
     if (onClick) {
@@ -35,6 +46,9 @@ export function Key({ keyData, onClick, isPressed, isShiftActive }: KeyProps) {
   const baseWidth = 3.5; // rem
   const baseHeight = 3.5; // rem
   const gap = 0.25; // gap between keys
+
+  // Check if key should show active state
+  const isActive = isPressed || (isShiftKey && isShiftActive) || (isCapsLockKey && isCapsLockActive);
 
   const style = {
     width: `${width * baseWidth}rem`,
@@ -53,20 +67,12 @@ export function Key({ keyData, onClick, isPressed, isShiftActive }: KeyProps) {
         hover:shadow-md
         transition-all
         font-mono
-        text-sm
         cursor-pointer
         select-none
         flex items-center justify-center
-        ${isPressed
-          ? "bg-blue-500 text-white border-blue-600 shadow-inner"
-          : isShiftKey && isShiftActive
-          ? "bg-yellow-200 text-gray-800 border-yellow-400"
-          : "bg-white border-gray-300 hover:bg-gray-100 active:bg-gray-200"
-        }
-        ${type === "modifier" && !isPressed && !(isShiftKey && isShiftActive) ? "bg-gray-50 text-gray-600 font-semibold" : ""}
-        ${type === "space" && !isPressed ? "bg-gray-50" : ""}
-        ${type === "function" && !isPressed ? "bg-blue-50 text-blue-700 text-xs" : ""}
+        ${isActive ? "key-active" : "bg-white border-gray-300 hover:bg-gray-200"}
         ${type === "modifier" || type === "function" ? "font-semibold" : ""}
+        ${type === "function" ? "text-xs" : "text-sm"}
       `}
       title={keyData.id}
     >

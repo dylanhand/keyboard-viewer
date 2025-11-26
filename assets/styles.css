@@ -142,3 +142,16 @@ html {
     rgb(254, 249, 195)
   );
 }
+
+/* Keyboard key styles */
+.key-active {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  border-color: #9ca3af;
+}
+.border-gray-300 {
+  border-color: #d1d5db;
+}
+.hover\:bg-gray-200:hover {
+  background-color: #e5e7eb;
+}

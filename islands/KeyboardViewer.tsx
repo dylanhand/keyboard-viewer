@@ -12,10 +12,32 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
   const pressedKeyId = useSignal<string | null>(null);
   const isShiftActive = useSignal(false);
   const shiftClickMode = useSignal(false); // true if shift was clicked, false if held
+  const isCapsLockActive = useSignal(false);
 
   // Helper: Check if a key is a Shift key
   const isShiftKey = (key: Key): boolean => {
     return key.id === "ShiftLeft" || key.id === "ShiftRight";
+  };
+
+  // Helper: Check if a key is the Caps Lock key
+  const isCapsLockKey = (key: Key): boolean => {
+    return key.id === "CapsLock";
+  };
+
+  // Helper: Get the character to output based on shift and caps lock state
+  const getOutputChar = (key: Key): string => {
+    // For letter keys, caps lock affects output
+    // Use Unicode property escape to match all lowercase letters (including accented and non-Latin)
+    const isLetter = key.output.length === 1 && /\p{Ll}/u.test(key.output);
+
+    if (isLetter) {
+      // Shift inverts caps lock for letters
+      const shouldBeUppercase = isCapsLockActive.value !== isShiftActive.value;
+      return shouldBeUppercase ? key.output.toUpperCase() : key.output;
+    } else {
+      // For non-letters, only shift matters
+      return isShiftActive.value && key.shiftOutput ? key.shiftOutput : key.output;
+    }
   };
 
   // Helper: Exit shift mode if in click mode (one-shot shift)
@@ -47,15 +69,22 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
       const key = findKeyByCode(e.code);
       if (key) {
-        pressedKeyId.value = key.id;
-
         // Handle Shift key specially - activate shift mode but don't call handleKeyClick
         if (isShiftKey(key)) {
+          pressedKeyId.value = key.id;
           isShiftActive.value = true;
           shiftClickMode.value = false; // Physical hold, not click
           return;
         }
 
+        // Handle Caps Lock key specially - toggle on each press
+        // Don't set pressedKeyId for toggle keys - we show active state instead
+        if (isCapsLockKey(key)) {
+          isCapsLockActive.value = !isCapsLockActive.value;
+          return;
+        }
+
+        pressedKeyId.value = key.id;
         handleKeyClick(key);
       }
     };
@@ -92,6 +121,12 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
       return;
     }
 
+    // Handle Caps Lock key clicks
+    if (isCapsLockKey(key)) {
+      isCapsLockActive.value = !isCapsLockActive.value;
+      return;
+    }
+
     // Handle special keys
     if (key.id === "Backspace") {
       text.value = text.value.slice(0, -1);
@@ -116,8 +151,8 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
       return;
     }
 
-    // Add the character to the text (use shift output if shift is active)
-    const charToAdd = isShiftActive.value && key.shiftOutput ? key.shiftOutput : key.output;
+    // Add the character to the text
+    const charToAdd = getOutputChar(key);
     text.value += charToAdd;
 
     // Exit shift mode if in click mode (one-shot shift)
@@ -160,6 +195,7 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
           onKeyClick={handleKeyClick}
           pressedKeyId={pressedKeyId.value}
           isShiftActive={isShiftActive.value}
+          isCapsLockActive={isCapsLockActive.value}
         />
       </div>
 
