@@ -1,4 +1,4 @@
-import type { KeyboardLayout } from "../types/keyboard-simple.ts";
+import type { KeyboardLayout, Key } from "../types/keyboard-simple.ts";
 
 /**
  * Transforms keyboard layouts from kbdgen format (used by giellalt)
@@ -92,7 +92,7 @@ const ISO_KEY_POSITIONS = {
  * Special (non-printable) keys with their display properties.
  * These keys don't produce regular character output but have special functions.
  */
-const SPECIAL_KEYS = {
+const SPECIAL_KEYS: Record<string, Key> = {
   backspace: { id: "Backspace", output: "\b", label: "⌫", width: 2.0, type: "modifier" },
   tab: { id: "Tab", output: "\t", label: "Tab", width: 1.5, type: "modifier" },
   enter: { id: "Enter", output: "\n", label: "Enter", width: 1.3, height: 2.075, type: "enter" },
