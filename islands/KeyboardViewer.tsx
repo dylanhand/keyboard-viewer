@@ -256,11 +256,6 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
           class="w-full h-32 p-3 border-2 border-gray-300 rounded font-mono text-sm resize-y focus:outline-none focus:border-blue-500"
           placeholder="Click keys on the keyboard below to type..."
         />
-        {pendingDeadkey.value !== null && (
-          <div class="mt-2 text-sm text-gray-600 italic">
-            Deadkey active: <span class="font-mono font-semibold">{pendingDeadkey.value}</span> (waiting for next key)
-          </div>
-        )}
       </div>
 
       {/* Keyboard */}
@@ -271,6 +266,7 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
           pressedKeyId={pressedKeyId.value}
           isShiftActive={isShiftActive.value}
           isCapsLockActive={isCapsLockActive.value}
+          pendingDeadkey={pendingDeadkey.value}
         />
       </div>
 
