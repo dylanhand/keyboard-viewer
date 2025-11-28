@@ -53,26 +53,22 @@ interface KbdgenDeadKeys {
   alt?: string[];
 }
 
-interface KbdgenMacOS {
+interface KbdgenPlatformData {
   primary?: KbdgenPrimary;
   space?: KbdgenSpace;
   deadKeys?: KbdgenDeadKeys;
   transforms?: KbdgenTransform;
 }
 
-interface KbdgenPlatform {
-  layers?: KbdgenLayers;
-  transforms?: KbdgenTransform;
-}
-
 interface KbdgenLayout {
   displayNames?: { [lang: string]: string };
   locale?: string;
-  macOS?: KbdgenMacOS;
-  windows?: KbdgenPlatform;
-  android?: KbdgenPlatform;
-  iOS?: KbdgenPlatform;
-  chrome?: KbdgenPlatform;
+  macOS?: KbdgenPlatformData;
+  windows?: KbdgenPlatformData;
+  android?: KbdgenPlatformData;
+  iOS?: KbdgenPlatformData;
+  chrome?: KbdgenPlatformData;
+  chromeOS?: KbdgenPlatformData;
   transforms?: KbdgenTransform;
 }
 
@@ -128,36 +124,29 @@ function parseLayerString(layerString: string): string[][] {
 
 /**
  * Extracts platform-specific layers and transforms from kbdgen data.
- * macOS has a nested structure (primary.layers), other platforms are flat.
+ * All platforms use the nested primary.layers structure in kbdgen format.
  */
 function extractPlatformData(
   kbdgenData: KbdgenLayout,
   platform: string,
 ): { layers: KbdgenLayers; transforms: KbdgenTransform } {
-  let layers: KbdgenLayers | undefined;
-  let platformTransforms: KbdgenTransform = {};
+  // Get the platform data (macOS, windows, android, iOS, chrome, chromeOS)
+  const platformData = kbdgenData[platform as keyof KbdgenLayout] as
+    | KbdgenPlatformData
+    | undefined;
 
-  if (platform === "macOS") {
-    const macOSData = kbdgenData.macOS;
-    if (!macOSData) {
-      throw new Error(`Platform "${platform}" not found in layout`);
-    }
-    layers = macOSData.primary?.layers;
-    platformTransforms = macOSData.transforms || {};
-  } else {
-    const platformData = kbdgenData[platform as keyof KbdgenLayout] as
-      | KbdgenPlatform
-      | undefined;
-    if (!platformData) {
-      throw new Error(`Platform "${platform}" not found in layout`);
-    }
-    layers = platformData.layers;
-    platformTransforms = platformData.transforms || {};
+  if (!platformData) {
+    throw new Error(`Platform "${platform}" not found in layout`);
   }
 
+  // Extract layers from primary.layers
+  const layers = platformData.primary?.layers;
   if (!layers || !layers.default) {
     throw new Error(`No layers found for platform "${platform}"`);
   }
+
+  // Get platform-specific transforms
+  const platformTransforms = platformData.transforms || {};
 
   // Merge top-level transforms (shared across platforms) with platform-specific transforms
   const allTransforms = {
@@ -310,6 +299,7 @@ export function getAvailablePlatforms(kbdgenData: KbdgenLayout): string[] {
   if (kbdgenData.android) platforms.push("android");
   if (kbdgenData.iOS) platforms.push("iOS");
   if (kbdgenData.chrome) platforms.push("chrome");
+  if (kbdgenData.chromeOS) platforms.push("chromeOS");
 
   return platforms;
 }
