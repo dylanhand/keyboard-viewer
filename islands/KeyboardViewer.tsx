@@ -2,19 +2,23 @@ import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import type { Key, KeyboardLayout } from "../types/keyboard-simple.ts";
 import { KeyboardLayout as KeyboardLayoutComponent } from "../components/KeyboardLayout.tsx";
+import { GitHubKeyboardSelector } from "../components/GitHubKeyboardSelector.tsx";
 
 interface KeyboardViewerProps {
   layouts: KeyboardLayout[];
 }
 
-export default function KeyboardViewer({ layouts }: KeyboardViewerProps) {
+export default function KeyboardViewer(
+  { layouts: initialLayouts }: KeyboardViewerProps,
+) {
   const text = useSignal("");
   const pressedKeyId = useSignal<string | null>(null);
   const isShiftActive = useSignal(false);
   const shiftClickMode = useSignal(false); // true if shift was clicked, false if held
   const isCapsLockActive = useSignal(false);
   const pendingDeadkey = useSignal<string | null>(null); // Holds the deadkey character waiting for combination
-  const selectedLayoutId = useSignal(layouts[0]?.id ?? "");
+  const allLayouts = useSignal<KeyboardLayout[]>(initialLayouts);
+  const selectedLayoutId = useSignal(initialLayouts[0]?.id ?? "");
 
   const clearState = () => {
     text.value = "";
@@ -25,9 +29,27 @@ export default function KeyboardViewer({ layouts }: KeyboardViewerProps) {
     pressedKeyId.value = null;
   };
 
+  const handleGitHubLayoutLoaded = (layout: KeyboardLayout) => {
+    // Check if this layout is already in the list
+    const existingIndex = allLayouts.value.findIndex((l) => l.id === layout.id);
+    if (existingIndex >= 0) {
+      // Replace existing layout
+      const updated = [...allLayouts.value];
+      updated[existingIndex] = layout;
+      allLayouts.value = updated;
+    } else {
+      // Add new layout
+      allLayouts.value = [...allLayouts.value, layout];
+    }
+    // Select the newly loaded layout
+    selectedLayoutId.value = layout.id;
+    clearState();
+  };
+
   // Get the currently selected layout
-  const layout = layouts.find((l) => l.id === selectedLayoutId.value) ??
-    layouts[0];
+  const layout =
+    allLayouts.value.find((l) => l.id === selectedLayoutId.value) ??
+      allLayouts.value[0];
 
   // Guard against undefined layout
   if (!layout) {
@@ -251,10 +273,13 @@ export default function KeyboardViewer({ layouts }: KeyboardViewerProps) {
 
   return (
     <div class="flex flex-col gap-6">
-      {/* Layout selector */}
+      {/* GitHub Keyboard Selector */}
+      <GitHubKeyboardSelector onLayoutLoaded={handleGitHubLayoutLoaded} />
+
+      {/* Local/Loaded Layouts Selector */}
       <div class="w-full">
         <label class="block text-sm font-semibold text-gray-700 mb-2">
-          Select Layout
+          Or select from loaded layouts:
         </label>
         <select
           value={selectedLayoutId.value}
@@ -264,7 +289,7 @@ export default function KeyboardViewer({ layouts }: KeyboardViewerProps) {
           }}
           class="w-full p-2 border-2 border-gray-300 rounded font-mono text-sm focus:outline-none focus:border-blue-500"
         >
-          {layouts.map((layoutOption) => (
+          {allLayouts.value.map((layoutOption) => (
             <option key={layoutOption.id} value={layoutOption.id}>
               {layoutOption.name}
             </option>
