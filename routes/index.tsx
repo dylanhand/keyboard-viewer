@@ -4,10 +4,18 @@ import KeyboardViewer from "../islands/KeyboardViewer.tsx";
 import type { KeyboardLayout } from "../types/keyboard-simple.ts";
 
 export default define.page(async function Home() {
-  // Load the keyboard layout from JSON file
-  const layoutPath = new URL("../data/layouts/iso-qwerty.json", import.meta.url);
-  const layoutJson = await Deno.readTextFile(layoutPath);
-  const layout: KeyboardLayout = JSON.parse(layoutJson);
+  // Load all available keyboard layouts
+  const layoutFiles = [
+    "iso-qwerty.json",
+    "sme-macos.json"
+  ];
+
+  const layouts: KeyboardLayout[] = [];
+  for (const file of layoutFiles) {
+    const layoutPath = new URL(`../data/layouts/${file}`, import.meta.url);
+    const layoutJson = await Deno.readTextFile(layoutPath);
+    layouts.push(JSON.parse(layoutJson));
+  }
 
   return (
     <div class="px-4 py-8 mx-auto min-h-screen bg-gray-50">
@@ -24,7 +32,7 @@ export default define.page(async function Home() {
           </p>
         </div>
 
-        <KeyboardViewer layout={layout} />
+        <KeyboardViewer layouts={layouts} />
       </div>
     </div>
   );

@@ -4,16 +4,39 @@ import type { Key, KeyboardLayout } from "../types/keyboard-simple.ts";
 import { KeyboardLayout as KeyboardLayoutComponent } from "../components/KeyboardLayout.tsx";
 
 interface KeyboardViewerProps {
-  layout: KeyboardLayout;
+  layouts: KeyboardLayout[];
 }
 
-export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
+export default function KeyboardViewer({ layouts }: KeyboardViewerProps) {
   const text = useSignal("");
   const pressedKeyId = useSignal<string | null>(null);
   const isShiftActive = useSignal(false);
   const shiftClickMode = useSignal(false); // true if shift was clicked, false if held
   const isCapsLockActive = useSignal(false);
   const pendingDeadkey = useSignal<string | null>(null); // Holds the deadkey character waiting for combination
+  const selectedLayoutId = useSignal(layouts[0]?.id ?? "");
+
+  const clearState = () => {
+    text.value = "";
+    pendingDeadkey.value = null;
+    isShiftActive.value = false;
+    shiftClickMode.value = false;
+    isCapsLockActive.value = false;
+    pressedKeyId.value = null;
+  };
+
+  // Get the currently selected layout
+  const layout = layouts.find((l) => l.id === selectedLayoutId.value) ??
+    layouts[0];
+
+  // Guard against undefined layout
+  if (!layout) {
+    return (
+      <div class="text-center text-red-600 p-4">
+        No keyboard layout available
+      </div>
+    );
+  }
 
   // Helper: Check if a key is a Shift key
   const isShiftKey = (key: Key): boolean => {
@@ -228,6 +251,27 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
   return (
     <div class="flex flex-col gap-6">
+      {/* Layout selector */}
+      <div class="w-full">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          Select Layout
+        </label>
+        <select
+          value={selectedLayoutId.value}
+          onChange={(e) => {
+            selectedLayoutId.value = (e.target as HTMLSelectElement).value;
+            clearState();
+          }}
+          class="w-full p-2 border-2 border-gray-300 rounded font-mono text-sm focus:outline-none focus:border-blue-500"
+        >
+          {layouts.map((layoutOption) => (
+            <option key={layoutOption.id} value={layoutOption.id}>
+              {layoutOption.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Output text area */}
       <div class="w-full">
         <div class="flex justify-between items-center mb-2">
