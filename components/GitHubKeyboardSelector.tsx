@@ -141,11 +141,18 @@ export function GitHubKeyboardSelector({ onLayoutLoaded }: GitHubKeyboardSelecto
             class="w-full p-2 border-2 border-gray-300 rounded font-mono text-sm focus:outline-none focus:border-blue-500 disabled:bg-gray-100"
           >
             <option value="">-- Select a language --</option>
-            {repos.value.map((repo) => (
-              <option key={repo.code} value={repo.code}>
-                {repo.code} - {repo.description || repo.name}
-              </option>
-            ))}
+            {repos.value.map((repo) => {
+              const cleanDescription = repo.description
+                .split(/\s+/)
+                .filter(word => !['keyboards', 'for', 'the', 'language', 'layout', 'keyboard'].includes(word.toLowerCase()))
+                .join(' ')
+                .trim();
+              return (
+                <option key={repo.code} value={repo.code}>
+                  {repo.code} - {cleanDescription || repo.code}
+                </option>
+              );
+            })}
           </select>
         </div>
 
