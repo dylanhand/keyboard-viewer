@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
-import type { KeyboardLayout, Key } from "../types/keyboard-simple.ts";
+import type { Key, KeyboardLayout } from "../types/keyboard-simple.ts";
 import { KeyboardLayout as KeyboardLayoutComponent } from "../components/KeyboardLayout.tsx";
 
 interface KeyboardViewerProps {
@@ -37,7 +37,9 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
       return shouldBeUppercase ? key.output.toUpperCase() : key.output;
     } else {
       // For non-letters, only shift matters
-      return isShiftActive.value && key.shiftOutput ? key.shiftOutput : key.output;
+      return isShiftActive.value && key.shiftOutput
+        ? key.shiftOutput
+        : key.output;
     }
   };
 
@@ -49,22 +51,8 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
     }
   };
 
-  // Deadkey combinations lookup
-  // TODO: This will eventually come from the keyboard layout data
-  const deadkeyCombinations: Record<string, Record<string, string>> = {
-    "`": {
-      "a": "à",
-      "e": "è",
-      "i": "ì",
-      "o": "ò",
-      "u": "ù",
-      "A": "À",
-      "E": "È",
-      "I": "Ì",
-      "O": "Ò",
-      "U": "Ù",
-    },
-  };
+  // Get deadkey combinations from the layout
+  const deadkeyCombinations = layout.deadkeys ?? {};
 
   // Helper: Check if a character is a deadkey
   const isDeadkey = (char: string): boolean => {
@@ -73,14 +61,17 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
   // Helper: Get the combination result for deadkey + character
   // Returns the combined character if it exists, otherwise null
-  const getDeadkeyCombination = (deadkey: string, char: string): string | null => {
+  const getDeadkeyCombination = (
+    deadkey: string,
+    char: string,
+  ): string | null => {
     return deadkeyCombinations[deadkey]?.[char] ?? null;
   };
 
   // Find a key in the layout by its physical key code
   const findKeyByCode = (code: string): Key | undefined => {
     for (const row of layout.rows) {
-      const key = row.keys.find(k => k.id === code);
+      const key = row.keys.find((k) => k.id === code);
       if (key) return key;
     }
     return undefined;
@@ -200,7 +191,10 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
     // Check if we have a pending deadkey
     if (pendingDeadkey.value !== null) {
-      const combination = getDeadkeyCombination(pendingDeadkey.value, charToAdd);
+      const combination = getDeadkeyCombination(
+        pendingDeadkey.value,
+        charToAdd,
+      );
       if (combination !== null) {
         // We have a combination - output the combined character
         text.value += combination;
@@ -272,8 +266,12 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
       {/* Info */}
       <div class="text-center text-sm text-gray-600">
-        <p>Layout: <strong>{layout.name}</strong></p>
-        <p class="text-xs mt-1">Click keys to type, or type directly in the text area</p>
+        <p>
+          Layout: <strong>{layout.name}</strong>
+        </p>
+        <p class="text-xs mt-1">
+          Click keys to type, or type directly in the text area
+        </p>
       </div>
     </div>
   );

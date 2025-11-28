@@ -1,9 +1,14 @@
 import { Head } from "fresh/runtime";
 import { define } from "../utils.ts";
 import KeyboardViewer from "../islands/KeyboardViewer.tsx";
-import { isoQwertyLayout } from "../data/iso-qwerty.ts";
+import type { KeyboardLayout } from "../types/keyboard-simple.ts";
 
-export default define.page(function Home() {
+export default define.page(async function Home() {
+  // Load the keyboard layout from JSON file
+  const layoutPath = new URL("../data/layouts/iso-qwerty.json", import.meta.url);
+  const layoutJson = await Deno.readTextFile(layoutPath);
+  const layout: KeyboardLayout = JSON.parse(layoutJson);
+
   return (
     <div class="px-4 py-8 mx-auto min-h-screen bg-gray-50">
       <Head>
@@ -19,7 +24,7 @@ export default define.page(function Home() {
           </p>
         </div>
 
-        <KeyboardViewer layout={isoQwertyLayout} />
+        <KeyboardViewer layout={layout} />
       </div>
     </div>
   );

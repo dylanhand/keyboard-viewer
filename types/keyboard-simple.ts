@@ -34,10 +34,21 @@ export interface KeyRow {
 }
 
 /**
+ * Deadkey combinations: maps deadkey character to its possible combinations
+ * Example: { "`": { "a": "à", "e": "è" } }
+ */
+export interface DeadkeyCombinations {
+  [deadkey: string]: {
+    [baseChar: string]: string;
+  };
+}
+
+/**
  * Complete keyboard layout
  */
 export interface KeyboardLayout {
   id: string;
   name: string;
   rows: KeyRow[];
+  deadkeys?: DeadkeyCombinations;
 }
