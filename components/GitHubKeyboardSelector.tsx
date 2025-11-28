@@ -96,12 +96,13 @@ export function GitHubKeyboardSelector({ onLayoutLoaded }: GitHubKeyboardSelecto
 
         platforms.value = data.availablePlatforms;
 
-        // Auto-select macOS if available, otherwise first platform
-        if (data.availablePlatforms.includes("macOS") && selectedPlatform.value !== "macOS") {
-          selectedPlatform.value = "macOS";
-          return; // Will trigger another fetch with macOS
-        } else if (!data.availablePlatforms.includes(selectedPlatform.value)) {
-          selectedPlatform.value = data.availablePlatforms[0] || "macOS";
+        // Only auto-select a different platform if the current selection is not available
+        if (!data.availablePlatforms.includes(selectedPlatform.value)) {
+          // Prefer macOS if available, otherwise use first platform
+          const newPlatform = data.availablePlatforms.includes("macOS")
+            ? "macOS"
+            : data.availablePlatforms[0] || "macOS";
+          selectedPlatform.value = newPlatform;
           return; // Will trigger another fetch with the new platform
         }
 
