@@ -13,6 +13,7 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
   const isShiftActive = useSignal(false);
   const shiftClickMode = useSignal(false); // true if shift was clicked, false if held
   const isCapsLockActive = useSignal(false);
+  const pendingDeadkey = useSignal<string | null>(null); // Holds the deadkey character waiting for combination
 
   // Helper: Check if a key is a Shift key
   const isShiftKey = (key: Key): boolean => {
@@ -46,6 +47,34 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
       isShiftActive.value = false;
       shiftClickMode.value = false;
     }
+  };
+
+  // Deadkey combinations lookup
+  // TODO: This will eventually come from the keyboard layout data
+  const deadkeyCombinations: Record<string, Record<string, string>> = {
+    "`": {
+      "a": "à",
+      "e": "è",
+      "i": "ì",
+      "o": "ò",
+      "u": "ù",
+      "A": "À",
+      "E": "È",
+      "I": "Ì",
+      "O": "Ò",
+      "U": "Ù",
+    },
+  };
+
+  // Helper: Check if a character is a deadkey
+  const isDeadkey = (char: string): boolean => {
+    return char in deadkeyCombinations;
+  };
+
+  // Helper: Get the combination result for deadkey + character
+  // Returns the combined character if it exists, otherwise null
+  const getDeadkeyCombination = (deadkey: string, char: string): string | null => {
+    return deadkeyCombinations[deadkey]?.[char] ?? null;
   };
 
   // Find a key in the layout by its physical key code
@@ -129,18 +158,33 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
     // Handle special keys
     if (key.id === "Backspace") {
-      text.value = text.value.slice(0, -1);
+      // If there's a pending deadkey, just cancel it instead of deleting
+      if (pendingDeadkey.value !== null) {
+        pendingDeadkey.value = null;
+      } else {
+        text.value = text.value.slice(0, -1);
+      }
       exitShiftClickMode();
       return;
     }
 
     if (key.id === "Enter") {
+      // If there's a pending deadkey, output it first
+      if (pendingDeadkey.value !== null) {
+        text.value += pendingDeadkey.value;
+        pendingDeadkey.value = null;
+      }
       text.value += "\n";
       exitShiftClickMode();
       return;
     }
 
     if (key.id === "Tab") {
+      // If there's a pending deadkey, output it first
+      if (pendingDeadkey.value !== null) {
+        text.value += pendingDeadkey.value;
+        pendingDeadkey.value = null;
+      }
       text.value += "\t";
       exitShiftClickMode();
       return;
@@ -151,8 +195,32 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
       return;
     }
 
-    // Add the character to the text
+    // Get the character that would be output
     const charToAdd = getOutputChar(key);
+
+    // Check if we have a pending deadkey
+    if (pendingDeadkey.value !== null) {
+      const combination = getDeadkeyCombination(pendingDeadkey.value, charToAdd);
+      if (combination !== null) {
+        // We have a combination - output the combined character
+        text.value += combination;
+      } else {
+        // No combination exists - output deadkey followed by the character
+        text.value += pendingDeadkey.value + charToAdd;
+      }
+      pendingDeadkey.value = null;
+      exitShiftClickMode();
+      return;
+    }
+
+    // Check if the current character is a deadkey
+    if (isDeadkey(charToAdd)) {
+      pendingDeadkey.value = charToAdd;
+      exitShiftClickMode();
+      return;
+    }
+
+    // Normal character - just add it
     text.value += charToAdd;
 
     // Exit shift mode if in click mode (one-shot shift)
@@ -161,6 +229,7 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
 
   const handleClear = () => {
     text.value = "";
+    pendingDeadkey.value = null; // Clear any pending deadkey
   };
 
   return (
@@ -182,10 +251,16 @@ export default function KeyboardViewer({ layout }: KeyboardViewerProps) {
           value={text.value}
           onInput={(e) => {
             text.value = (e.target as HTMLTextAreaElement).value;
+            pendingDeadkey.value = null; // Clear deadkey state when typing directly
           }}
           class="w-full h-32 p-3 border-2 border-gray-300 rounded font-mono text-sm resize-y focus:outline-none focus:border-blue-500"
           placeholder="Click keys on the keyboard below to type..."
         />
+        {pendingDeadkey.value !== null && (
+          <div class="mt-2 text-sm text-gray-600 italic">
+            Deadkey active: <span class="font-mono font-semibold">{pendingDeadkey.value}</span> (waiting for next key)
+          </div>
+        )}
       </div>
 
       {/* Keyboard */}

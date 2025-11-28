@@ -155,3 +155,14 @@ html {
 .hover\:bg-gray-200:hover {
   background-color: #e5e7eb;
 }
+
+/* Utility classes for deadkey indicator */
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.text-gray-600 {
+  color: #4b5563;
+}
+.italic {
+  font-style: italic;
+}
