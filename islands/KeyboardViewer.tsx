@@ -392,7 +392,7 @@ export default function KeyboardViewer(
                 pendingDeadkey.value = null; // Clear deadkey state when typing directly
               }}
               class="w-full h-32 p-3 pr-10 border-2 border-gray-300 rounded font-mono text-sm resize-y focus:outline-none focus:border-blue-500"
-              placeholder="Click keys on the keyboard below to type..."
+              placeholder="Click keys below or use your keyboard to type..."
             />
             {text.value && (
               <button
@@ -431,9 +431,6 @@ export default function KeyboardViewer(
       <div class="text-center text-sm text-gray-600">
         <p>
           Layout: <strong>{layout.name}</strong>
-        </p>
-        <p class="text-xs mt-1">
-          Click keys to type, or type directly in the text area
         </p>
       </div>
 

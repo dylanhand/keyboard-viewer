@@ -27,7 +27,7 @@ export default define.page(async function Home() {
             Interactive Keyboard Viewer
           </h1>
           <p class="text-gray-600">
-            Click keys on the keyboard to type into the text area
+            Click keys or use your keyboard to type into the text area
           </p>
         </div>
 
