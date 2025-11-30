@@ -374,7 +374,7 @@ export default function KeyboardViewer(
     // Handle Shift key clicks
     if (isShiftKey(key)) {
       isShiftActive.value = !isShiftActive.value;
-      shiftClickMode.value = isShiftActive.value; // Only set clickMode when toggling on
+      shiftClickMode.value = isShiftActive.value;
       return;
     }
 
@@ -384,8 +384,24 @@ export default function KeyboardViewer(
       return;
     }
 
-    // Ignore other modifier keys (Alt, Cmd, Ctrl) - they can only be toggled via toggle buttons
-    if (isAltKey(key) || isCmdKey(key) || isCtrlKey(key)) {
+    // Handle Alt key clicks
+    if (isAltKey(key)) {
+      isAltActive.value = !isAltActive.value;
+      altClickMode.value = isAltActive.value;
+      return;
+    }
+
+    // Handle Cmd key clicks
+    if (isCmdKey(key)) {
+      isCmdActive.value = !isCmdActive.value;
+      cmdClickMode.value = isCmdActive.value;
+      return;
+    }
+
+    // Handle Ctrl key clicks
+    if (isCtrlKey(key)) {
+      isCtrlActive.value = !isCtrlActive.value;
+      ctrlClickMode.value = isCtrlActive.value;
       return;
     }
 
@@ -531,53 +547,11 @@ export default function KeyboardViewer(
       {/* Info */}
       <div class="flex justify-center">
         <div class="keyboard-width-container">
-          <div class="flex flex-wrap gap-2 items-center text-sm text-gray-600">
+          <div class="flex flex-wrap gap-4 items-center justify-center text-sm text-gray-600">
             <span>
               Layout: <strong>{layout.name}</strong>
             </span>
-            <span class="text-gray-700 mr-2">
-              Modifiers:
-            </span>
-            <button
-              onClick={() => {
-                isAltActive.value = !isAltActive.value;
-                altClickMode.value = isAltActive.value;
-              }}
-              class={`px-4 py-2 rounded border-2 font-mono text-sm transition-all ${
-                isAltActive.value
-                  ? "key-active"
-                  : "bg-white border-gray-300 hover:bg-gray-200"
-              }`}
-            >
-              Alt
-            </button>
-            <button
-              onClick={() => {
-                isCmdActive.value = !isCmdActive.value;
-                cmdClickMode.value = isCmdActive.value;
-              }}
-              class={`px-4 py-2 rounded border-2 font-mono text-sm transition-all ${
-                isCmdActive.value
-                  ? "key-active"
-                  : "bg-white border-gray-300 hover:bg-gray-200"
-              }`}
-            >
-              Cmd
-            </button>
-            <button
-              onClick={() => {
-                isCtrlActive.value = !isCtrlActive.value;
-                ctrlClickMode.value = isCtrlActive.value;
-              }}
-              class={`px-4 py-2 rounded border-2 font-mono text-sm transition-all ${
-                isCtrlActive.value
-                  ? "key-active"
-                  : "bg-white border-gray-300 hover:bg-gray-200"
-              }`}
-            >
-              Ctrl
-            </button>
-            <span class="text-gray-600 ml-2">
+            <span>
               Active Layer: <strong>{getLayerDisplayName(activeLayer.value)}</strong>
             </span>
           </div>
