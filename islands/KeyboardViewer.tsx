@@ -274,61 +274,57 @@ export default function KeyboardViewer(
   return (
     <div class="flex flex-col gap-6">
       {/* GitHub Keyboard Selector */}
-      <GitHubKeyboardSelector onLayoutLoaded={handleGitHubLayoutLoaded} />
+      <div class="flex justify-center">
+        <div class="keyboard-width-container">
+          <GitHubKeyboardSelector onLayoutLoaded={handleGitHubLayoutLoaded} />
+        </div>
+      </div>
 
       {/* Local/Loaded Layouts Selector */}
-      <div class="w-full">
-        <label class="block text-sm font-semibold text-gray-700 mb-2">
-          Or select from loaded layouts:
-        </label>
-        <select
-          value={selectedLayoutId.value}
-          onChange={(e) => {
-            selectedLayoutId.value = (e.target as HTMLSelectElement).value;
-            clearState();
-          }}
-          class="w-full p-2 border-2 border-gray-300 rounded font-mono text-sm focus:outline-none focus:border-blue-500"
-        >
-          {allLayouts.value.map((layoutOption) => (
-            <option key={layoutOption.id} value={layoutOption.id}>
-              {layoutOption.name}
-            </option>
-          ))}
-        </select>
+      <div class="flex justify-center">
+        <div class="keyboard-width-container">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Or select from loaded layouts:
+          </label>
+          <select
+            value={selectedLayoutId.value}
+            onChange={(e) => {
+              selectedLayoutId.value = (e.target as HTMLSelectElement).value;
+              clearState();
+            }}
+            class="w-full p-2 border-2 border-gray-300 rounded font-mono text-sm focus:outline-none focus:border-blue-500"
+          >
+            {allLayouts.value.map((layoutOption) => (
+              <option key={layoutOption.id} value={layoutOption.id}>
+                {layoutOption.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Output text area */}
       <div class="flex justify-center">
-        <div style="width: 50rem; max-width: 100%;">
+        <div class="keyboard-width-container">
           <div class="mb-2">
             <label class="block text-sm font-semibold text-gray-700">
               Output
             </label>
           </div>
-          <div style="position: relative;">
+          <div class="relative">
             <textarea
               value={text.value}
               onInput={(e) => {
                 text.value = (e.target as HTMLTextAreaElement).value;
                 pendingDeadkey.value = null; // Clear deadkey state when typing directly
               }}
-              style="width: 100%; height: 8rem; padding: 0.75rem; padding-right: 2.5rem; border: 2px solid #d1d5db; border-radius: 0.25rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 0.875rem; resize: vertical;"
+              class="w-full h-32 p-3 pr-10 border-2 border-gray-300 rounded font-mono text-sm resize-y focus:outline-none focus:border-blue-500"
               placeholder="Click keys on the keyboard below to type..."
-              onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
-              onBlur={(e) => e.currentTarget.style.borderColor = '#d1d5db'}
             />
             {text.value && (
               <button
                 onClick={handleClear}
-                style="position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background-color: #e5e7eb; border-radius: 50%; color: #4b5563; border: none; cursor: pointer; transition: all 150ms;"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#d1d5db';
-                  e.currentTarget.style.color = '#111827';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e5e7eb';
-                  e.currentTarget.style.color = '#4b5563';
-                }}
+                class="clear-button text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
                 title="Clear"
               >
                 <svg

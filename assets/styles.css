@@ -253,3 +253,151 @@ html {
 .disabled\:bg-gray-100:disabled {
   background-color: #f3f4f6;
 }
+
+/* Additional spacing utilities */
+.p-2 {
+  padding: 0.5rem;
+}
+.mt-1 {
+  margin-top: 0.25rem;
+}
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+/* Width utilities */
+.w-full {
+  width: 100%;
+}
+.w-40 {
+  width: 10rem;
+}
+
+/* Height utilities */
+.h-32 {
+  height: 8rem;
+}
+
+/* Flex utilities */
+.flex-1 {
+  flex: 1 1 0%;
+}
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Gap utilities */
+.gap-6 {
+  gap: 1.5rem;
+}
+
+/* Text size utilities */
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Font weight utilities */
+.font-semibold {
+  font-weight: 600;
+}
+
+/* Font family utilities */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Text alignment utilities */
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+/* Additional text colors */
+.text-red-600 {
+  color: #dc2626;
+}
+.text-gray-900 {
+  color: #111827;
+}
+
+/* Additional background colors */
+.bg-gray-50 {
+  background-color: #f9fafb;
+}
+.bg-gray-200 {
+  background-color: #e5e7eb;
+}
+
+/* Display utilities */
+.block {
+  display: block;
+}
+.inline-block {
+  display: inline-block;
+}
+
+/* Max width utilities */
+.max-w-7xl {
+  max-width: 80rem;
+}
+
+/* Shadow utilities */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Resize utilities */
+.resize-y {
+  resize: vertical;
+}
+
+/* Hover states */
+.hover\:text-gray-900:hover {
+  color: #111827;
+}
+
+/* Custom layout utilities */
+.keyboard-width-container {
+  width: 50rem;
+  max-width: 100%;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+/* Clear button styles */
+.clear-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e5e7eb;
+  border-radius: 50%;
+  border: none;
+}
+
+/* Textarea with clear button */
+.pr-10 {
+  padding-right: 2.5rem;
+}
