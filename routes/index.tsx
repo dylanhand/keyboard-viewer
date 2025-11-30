@@ -10,7 +10,10 @@ export default define.page(async function Home() {
 
   for await (const entry of Deno.readDir(layoutsDir)) {
     if (entry.isFile && entry.name.endsWith(".json")) {
-      const layoutPath = new URL(`../data/layouts/${entry.name}`, import.meta.url);
+      const layoutPath = new URL(
+        `../data/layouts/${entry.name}`,
+        import.meta.url,
+      );
       const layoutJson = await Deno.readTextFile(layoutPath);
       layouts.push(JSON.parse(layoutJson));
     }

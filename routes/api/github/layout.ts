@@ -1,6 +1,9 @@
 import { define } from "../../../utils.ts";
 import { parse as parseYaml } from "jsr:@std/yaml";
-import { transformKbdgenToLayout, getAvailablePlatforms } from "../../../utils/kbdgen-transform.ts";
+import {
+  getAvailablePlatforms,
+  transformKbdgenToLayout,
+} from "../../../utils/kbdgen-transform.ts";
 
 export const handler = define.handlers({
   async GET(req) {
@@ -13,7 +16,7 @@ export const handler = define.handlers({
       if (!langCode || !layoutFile) {
         return Response.json(
           { error: "Missing 'repo' or 'file' parameter" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -31,14 +34,14 @@ export const handler = define.handlers({
       // Fetch the YAML file from GitHub
       const response = await fetch(
         `https://raw.githubusercontent.com/giellalt/keyboard-${langCode}/refs/heads/main/${langCode}.kbdgen/layouts/${layoutFile}`,
-        { headers }
+        { headers },
       );
 
       if (!response.ok) {
         if (response.status === 404) {
           return Response.json(
             { error: "Layout file not found" },
-            { status: 404 }
+            { status: 404 },
           );
         }
         throw new Error(`GitHub fetch error: ${response.statusText}`);
@@ -53,7 +56,7 @@ export const handler = define.handlers({
       if (availablePlatforms.length === 0) {
         return Response.json(
           { error: "No platforms found in layout file" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -68,7 +71,7 @@ export const handler = define.handlers({
         kbdgenData,
         selectedPlatform,
         langCode,
-        layoutName
+        layoutName,
       );
 
       return Response.json({
@@ -80,7 +83,7 @@ export const handler = define.handlers({
     } catch (error) {
       return Response.json(
         { error: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
   },

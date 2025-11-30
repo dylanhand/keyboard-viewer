@@ -9,7 +9,7 @@ export const handler = define.handlers({
       if (!langCode) {
         return Response.json(
           { error: "Missing 'repo' parameter" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -28,14 +28,14 @@ export const handler = define.handlers({
       // Fetch contents of the layouts directory
       const response = await fetch(
         `https://api.github.com/repos/giellalt/keyboard-${langCode}/contents/${langCode}.kbdgen/layouts`,
-        { headers }
+        { headers },
       );
 
       if (!response.ok) {
         if (response.status === 404) {
           return Response.json(
             { error: "Layouts directory not found" },
-            { status: 404 }
+            { status: 404 },
           );
         }
         throw new Error(`GitHub API error: ${response.statusText}`);
@@ -60,7 +60,7 @@ export const handler = define.handlers({
     } catch (error) {
       return Response.json(
         { error: error.message },
-        { status: 500 }
+        { status: 500 },
       );
     }
   },
