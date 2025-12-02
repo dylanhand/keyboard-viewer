@@ -149,7 +149,10 @@ export function GitHubKeyboardSelector(
         <div class="flex items-center gap-2">
           <h2 class="text-lg font-bold text-gray-800">Load from GitHub</h2>
           {loading.value && (
-            <div class="spinner flex-shrink-0" />
+            <div
+              class="spinner flex-shrink-0"
+              style="width: 16px; height: 16px; border: 2px solid #e5e7eb; border-top-color: #4b5563; border-radius: 50%;"
+            />
           )}
         </div>
         <p class="text-sm text-gray-600 mt-1">
