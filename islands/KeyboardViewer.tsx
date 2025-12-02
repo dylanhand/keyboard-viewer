@@ -282,8 +282,8 @@ export default function KeyboardViewer(
   // Handle physical keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't handle if user is typing in the textarea
-      if (e.target instanceof HTMLTextAreaElement) {
+      // Don't handle if user is typing in an editable textarea (not readonly)
+      if (e.target instanceof HTMLTextAreaElement && !e.target.readOnly) {
         return;
       }
 
@@ -336,7 +336,8 @@ export default function KeyboardViewer(
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLTextAreaElement) {
+      // Don't handle if user is typing in an editable textarea (not readonly)
+      if (e.target instanceof HTMLTextAreaElement && !e.target.readOnly) {
         return;
       }
 
@@ -500,10 +501,7 @@ export default function KeyboardViewer(
           <div class="relative">
             <textarea
               value={text.value}
-              onInput={(e) => {
-                text.value = (e.target as HTMLTextAreaElement).value;
-                pendingDeadkey.value = null; // Clear deadkey state when typing directly
-              }}
+              readonly
               class="w-full h-32 p-3 pr-10 border-2 border-gray-300 rounded font-mono text-sm resize-y focus:outline-none focus:border-blue-500"
               placeholder="Click keys below or use your keyboard to type..."
             />
