@@ -285,9 +285,7 @@ function isMobilePlatform(platform: string): boolean {
 interface ParsedMobileKey {
   char: string;
   width?: number;
-  isSpecial?: boolean;
   specialType?: string;
-  isSpacer?: boolean;
 }
 
 function parseMobileKey(keyString: string): ParsedMobileKey | null {
@@ -306,7 +304,6 @@ function parseMobileKey(keyString: string): ParsedMobileKey | null {
     return {
       char: "",
       width,
-      isSpecial: true,
       specialType,
     };
   }
@@ -503,7 +500,7 @@ function createMobileKey(
   }
 
   // Handle special keys
-  if (parsedKey.isSpecial && parsedKey.specialType) {
+  if (parsedKey.specialType) {
     const specialType = parsedKey.specialType;
 
     // Map mobile special keys to standard key properties
