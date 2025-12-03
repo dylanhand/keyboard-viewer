@@ -336,11 +336,17 @@ function parseMobileLayerString(layerString: string): ParsedMobileKey[][] {
  * Gets available mobile variants for a platform.
  * iOS variants: primary, iPad-9in, iPad-12in
  * Android variants: primary, tablet-600
+ * Returns empty array for non-mobile platforms.
  */
 export function getMobileVariants(
   kbdgenData: KbdgenLayout,
   platform: string,
 ): string[] {
+  // Only return variants for mobile platforms
+  if (!isMobilePlatform(platform)) {
+    return [];
+  }
+
   const platformData = kbdgenData[platform as keyof KbdgenLayout] as
     | KbdgenPlatformData
     | undefined;
