@@ -612,32 +612,39 @@ function transformMobileLayout(
     return { keys };
   });
 
-  // Add synthetic bottom row with symbols key, spacebar, and return
+  // Add synthetic bottom row with spacebar and return
   // This row is standard across all mobile keyboards but not defined in YAML
+  // Only iOS keyboards have symbols layers, so only add the symbols key for iOS
+  const bottomRowKeys = [];
+
+  if (platform === "iOS") {
+    bottomRowKeys.push({
+      id: "MobileSymbols",
+      label: "123",
+      layers: { default: "" },
+      type: "modifier",
+      width: 1.5,
+    });
+  }
+
+  bottomRowKeys.push({
+    id: "Space",
+    label: "",
+    layers: { default: " " },
+    type: "space",
+    width: platform === "iOS" ? 8.0 : 9.5,
+  });
+
+  bottomRowKeys.push({
+    id: "Enter",
+    label: "⏎",
+    layers: { default: "\n" },
+    type: "modifier",
+    width: 1.5,
+  });
+
   rows.push({
-    keys: [
-      {
-        id: "MobileSymbols",
-        label: "123",
-        layers: { default: "" },
-        type: "modifier",
-        width: 1.5,
-      },
-      {
-        id: "Space",
-        label: "",
-        layers: { default: " " },
-        type: "space",
-        width: 8.0,
-      },
-      {
-        id: "Enter",
-        label: "⏎",
-        layers: { default: "\n" },
-        type: "modifier",
-        width: 1.5,
-      },
-    ],
+    keys: bottomRowKeys,
   });
 
   // Generate display name
