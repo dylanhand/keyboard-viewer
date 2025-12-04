@@ -110,7 +110,7 @@ export function KeyboardLayout({
         {layout.rows.map((row, rowIndex) => (
           <div
             key={rowIndex}
-            class={`flex ${layout.isMobile ? "justify-center" : ""}`}
+            class={`flex ${layout.isMobile || rowIndex === layout.rows.length - 1 ? "justify-center" : ""}`}
             style={{
               gap: `${gap}rem`,
               marginLeft: row.offset
