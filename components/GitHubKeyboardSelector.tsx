@@ -3,7 +3,7 @@ import { useEffect } from "preact/hooks";
 import type { KeyboardLayout } from "../types/keyboard-simple.ts";
 import { getErrorMessage } from "../utils.ts";
 
-interface Repo {
+export interface Repo {
   code: string;
   name: string;
   description: string;
@@ -24,13 +24,16 @@ interface LayoutResponse {
 }
 
 interface GitHubKeyboardSelectorProps {
+  repos: Repo[];
+  reposLoading: boolean;
+  reposError: string | null;
   onLayoutLoaded: (layout: KeyboardLayout, rawYaml: string) => void;
 }
 
 export function GitHubKeyboardSelector(
-  { onLayoutLoaded }: GitHubKeyboardSelectorProps,
+  { repos: initialRepos, reposLoading, reposError, onLayoutLoaded }:
+    GitHubKeyboardSelectorProps,
 ) {
-  const repos = useSignal<Repo[]>([]);
   const layouts = useSignal<LayoutFile[]>([]);
   const platforms = useSignal<string[]>([]);
   const variants = useSignal<string[]>([]);
@@ -40,32 +43,6 @@ export function GitHubKeyboardSelector(
   const selectedVariant = useSignal<string>("primary");
   const loading = useSignal<boolean>(false);
   const error = useSignal<string | null>(null);
-
-  // Fetch repos on mount
-  useEffect(() => {
-    async function fetchRepos() {
-      loading.value = true;
-      error.value = null;
-      try {
-        const response = await fetch("/api/github/repos");
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({
-            error: response.statusText,
-          }));
-          throw new Error(
-            errorData.error || `Failed to fetch repos (${response.status})`,
-          );
-        }
-        const data = await response.json();
-        repos.value = data;
-      } catch (e) {
-        error.value = getErrorMessage(e);
-      } finally {
-        loading.value = false;
-      }
-    }
-    fetchRepos();
-  }, []);
 
   // Fetch layouts when repo changes
   useEffect(() => {
@@ -167,7 +144,7 @@ export function GitHubKeyboardSelector(
       <div>
         <div class="flex items-center gap-2">
           <h2 class="text-lg font-bold text-gray-800">Load from GitHub</h2>
-          {loading.value && (
+          {(reposLoading || loading.value) && (
             <div
               class="spinner flex-shrink-0"
               style="width: 16px; height: 16px; border: 2px solid #e5e7eb; border-top-color: #4b5563; border-radius: 50%;"
@@ -179,9 +156,9 @@ export function GitHubKeyboardSelector(
         </p>
       </div>
 
-      {error.value && (
+      {(reposError || error.value) && (
         <div class="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          Error: {error.value}
+          Error: {reposError || error.value}
         </div>
       )}
 
@@ -196,11 +173,11 @@ export function GitHubKeyboardSelector(
             onChange={(e) => {
               selectedRepo.value = (e.target as HTMLSelectElement).value;
             }}
-            disabled={loading.value || repos.value.length === 0}
+            disabled={loading.value || reposLoading || initialRepos.length === 0}
             class="flex-1 p-2 border-2 border-gray-300 rounded font-mono text-sm focus:outline-none focus:border-blue-500 disabled:bg-gray-100"
           >
             <option value="">-- Select a language --</option>
-            {repos.value.map((repo) => {
+            {initialRepos.map((repo) => {
               const cleanDescription = repo.description
                 .split(/\s+/)
                 .filter((word) =>

@@ -2,7 +2,10 @@ import { useComputed, useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import type { Key, KeyboardLayout } from "../types/keyboard-simple.ts";
 import { KeyboardLayout as KeyboardLayoutComponent } from "../components/KeyboardLayout.tsx";
-import { GitHubKeyboardSelector } from "../components/GitHubKeyboardSelector.tsx";
+import {
+  GitHubKeyboardSelector,
+  type Repo,
+} from "../components/GitHubKeyboardSelector.tsx";
 import { parse as parseYaml } from "jsr:@std/yaml";
 import {
   getAvailablePlatforms,
@@ -57,6 +60,11 @@ export default function KeyboardViewer(
 
   // Track the last GitHub layout YAML
   const lastGitHubYaml = useSignal<string | null>(null);
+
+  // GitHub repos cache
+  const repos = useSignal<Repo[]>([]);
+  const reposLoading = useSignal<boolean>(false);
+  const reposError = useSignal<string | null>(null);
 
   // Compute the active layer based on modifier state
   const activeLayer = useComputed(() => {
@@ -320,6 +328,32 @@ export default function KeyboardViewer(
       parseAndLoadYaml();
     }
   }, [activeTab.value]);
+
+  // Fetch repos on mount (cached for tab switching)
+  useEffect(() => {
+    async function fetchRepos() {
+      reposLoading.value = true;
+      reposError.value = null;
+      try {
+        const response = await fetch("/api/github/repos");
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({
+            error: response.statusText,
+          }));
+          throw new Error(
+            errorData.error || `Failed to fetch repos (${response.status})`,
+          );
+        }
+        const data = await response.json();
+        repos.value = data;
+      } catch (e) {
+        reposError.value = getErrorMessage(e);
+      } finally {
+        reposLoading.value = false;
+      }
+    }
+    fetchRepos();
+  }, []);
 
   // Handle physical keyboard input
   useEffect(() => {
@@ -646,6 +680,9 @@ export default function KeyboardViewer(
           {activeTab.value === "github" && (
             <div>
               <GitHubKeyboardSelector
+                repos={repos.value}
+                reposLoading={reposLoading.value}
+                reposError={reposError.value}
                 onLayoutLoaded={handleGitHubLayoutLoaded}
               />
             </div>
