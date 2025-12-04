@@ -764,17 +764,25 @@ export function transformKbdgenToLayout(
     });
   }
 
-  // Row 5: Bottom row
+  // Row 5: Bottom row (Cmd keys only on macOS)
+  const bottomRowKeys = [SPECIAL_KEYS.controlLeft];
+  bottomRowKeys.push(SPECIAL_KEYS.altLeft);
+
+  if (platform === "macOS") {
+    bottomRowKeys.push(SPECIAL_KEYS.metaLeft);
+  }
+
+  bottomRowKeys.push(SPECIAL_KEYS.space);
+
+  if (platform === "macOS") {
+    bottomRowKeys.push(SPECIAL_KEYS.metaRight);
+  }
+
+  bottomRowKeys.push(SPECIAL_KEYS.altRight);
+  bottomRowKeys.push(SPECIAL_KEYS.controlRight);
+
   rows.push({
-    keys: [
-      SPECIAL_KEYS.controlLeft,
-      SPECIAL_KEYS.metaLeft,
-      SPECIAL_KEYS.altLeft,
-      SPECIAL_KEYS.space,
-      SPECIAL_KEYS.altRight,
-      SPECIAL_KEYS.metaRight,
-      SPECIAL_KEYS.controlRight,
-    ],
+    keys: bottomRowKeys,
   });
 
   // Generate display name
@@ -787,6 +795,7 @@ export function transformKbdgenToLayout(
     name: displayName,
     deadkeys,
     rows,
+    platform,
   };
 }
 
