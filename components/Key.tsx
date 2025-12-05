@@ -10,6 +10,8 @@ interface KeyProps {
   isAltActive?: boolean;
   isCmdActive?: boolean;
   isCtrlActive?: boolean;
+  isSymbolsActive?: boolean;
+  isSymbols2Active?: boolean;
   pendingDeadkey?: string | null;
 }
 
@@ -18,6 +20,11 @@ interface KeyProps {
  * with fallback logic if the layer doesn't exist.
  */
 function getKeyOutput(keyData: KeyType, activeLayer: string): string {
+  // Safety check: ensure layers exist
+  if (!keyData.layers) {
+    return "";
+  }
+
   // Try to get the character from the active layer
   const output = keyData.layers[activeLayer as keyof typeof keyData.layers];
   if (output !== undefined) {
@@ -25,7 +32,7 @@ function getKeyOutput(keyData: KeyType, activeLayer: string): string {
   }
 
   // Fallback to default layer
-  return keyData.layers.default;
+  return keyData.layers.default || "";
 }
 
 export function Key(
@@ -39,6 +46,8 @@ export function Key(
     isAltActive,
     isCmdActive,
     isCtrlActive,
+    isSymbolsActive,
+    isSymbols2Active,
     pendingDeadkey,
   }: KeyProps,
 ) {
@@ -49,16 +58,30 @@ export function Key(
   // Get the output character for the active layer
   const output = getKeyOutput(keyData, activeLayer);
 
-  // Determine the label to display
-  const label = keyData.label ?? output;
-
   // Check if this is a modifier key
   const isShiftKey = keyData.id === "ShiftLeft" || keyData.id === "ShiftRight";
+
+  // Determine the label to display
+  let label = keyData.label ?? output;
+
+  // Dynamic label for symbols key: "123" when in letter mode, "ABC" when in symbols mode
+  if (keyData.id === "MobileSymbols" || keyData.id === "MobileSymbols2") {
+    label = isSymbolsActive ? "ABC" : "123";
+  }
+
+  // Dynamic label for shift key in symbols mode
+  if (isShiftKey && isSymbolsActive) {
+    // When in symbols-2 (symbols-2 is active), show "123" to return to symbols-1
+    // When in symbols-1 (symbols-2 is not active), show "#+=" to go to symbols-2
+    label = isSymbols2Active ? "123" : "#+=";
+  }
   const isCapsLockKey = keyData.id === "CapsLock";
   const isAltKey = keyData.id === "AltLeft" || keyData.id === "AltRight";
   const isCmdKey = keyData.id === "MetaLeft" || keyData.id === "MetaRight";
   const isCtrlKey = keyData.id === "ControlLeft" ||
     keyData.id === "ControlRight";
+  const isSymbolsKey = keyData.id === "MobileSymbols" ||
+    keyData.id === "MobileSymbols2";
 
   // Check if this key produces the pending deadkey in any layer
   const isPendingDeadkey = pendingDeadkey !== null &&
@@ -77,11 +100,12 @@ export function Key(
 
   // Check if key should show active state
   const isActive = isPressed ||
-    (isShiftKey && isShiftActive) ||
+    (isShiftKey && (isSymbolsActive ? isSymbols2Active : isShiftActive)) ||
     (isCapsLockKey && isCapsLockActive) ||
     (isAltKey && isAltActive) ||
     (isCmdKey && isCmdActive) ||
     (isCtrlKey && isCtrlActive) ||
+    (isSymbolsKey && isSymbolsActive) ||
     isPendingDeadkey;
 
   // Check if this is an icon label (like ⌫, ⌘, etc.)

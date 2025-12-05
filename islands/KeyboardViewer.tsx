@@ -2,10 +2,14 @@ import { useComputed, useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import type { Key, KeyboardLayout } from "../types/keyboard-simple.ts";
 import { KeyboardLayout as KeyboardLayoutComponent } from "../components/KeyboardLayout.tsx";
-import { GitHubKeyboardSelector } from "../components/GitHubKeyboardSelector.tsx";
+import {
+  GitHubKeyboardSelector,
+  type Repo,
+} from "../components/GitHubKeyboardSelector.tsx";
 import { parse as parseYaml } from "jsr:@std/yaml";
 import {
   getAvailablePlatforms,
+  getMobileVariants,
   type KbdgenLayout,
   transformKbdgenToLayout,
 } from "../utils/kbdgen-transform.ts";
@@ -38,6 +42,8 @@ export default function KeyboardViewer(
   const cmdClickMode = useSignal(false);
   const isCtrlActive = useSignal(false);
   const ctrlClickMode = useSignal(false);
+  const isSymbolsActive = useSignal(false); // Mobile symbols mode
+  const isSymbols2Active = useSignal(false); // Mobile symbols-2 layer toggle
 
   const pendingDeadkey = useSignal<string | null>(null); // Holds the deadkey character waiting for combination
   const allLayouts = useSignal<KeyboardLayout[]>(initialLayouts);
@@ -49,12 +55,25 @@ export default function KeyboardViewer(
   const yamlError = useSignal<string | null>(null);
   const yamlDefaultPlatform = useSignal("macOS");
   const yamlAvailablePlatforms = useSignal<string[]>([]);
+  const yamlDefaultVariant = useSignal("primary");
+  const yamlAvailableVariants = useSignal<string[]>([]);
 
   // Track the last GitHub layout YAML
   const lastGitHubYaml = useSignal<string | null>(null);
 
+  // GitHub repos cache
+  const repos = useSignal<Repo[]>([]);
+  const reposLoading = useSignal<boolean>(false);
+  const reposError = useSignal<string | null>(null);
+
   // Compute the active layer based on modifier state
   const activeLayer = useComputed(() => {
+    // For mobile symbols mode, use symbols-1 or symbols-2
+    if (isSymbolsActive.value) {
+      return isSymbols2Active.value ? "symbols-2" : "symbols-1";
+    }
+
+    // Desktop/normal layers
     const modifiers: ModifierState = {
       shift: isShiftActive.value,
       caps: isCapsLockActive.value,
@@ -77,6 +96,8 @@ export default function KeyboardViewer(
     cmdClickMode.value = false;
     isCtrlActive.value = false;
     ctrlClickMode.value = false;
+    isSymbolsActive.value = false;
+    isSymbols2Active.value = false;
     pressedKeyId.value = null;
   };
 
@@ -108,6 +129,7 @@ export default function KeyboardViewer(
 
     if (!yamlContent.value.trim()) {
       yamlAvailablePlatforms.value = [];
+      yamlAvailableVariants.value = [];
       return;
     }
 
@@ -131,12 +153,27 @@ export default function KeyboardViewer(
 
       yamlDefaultPlatform.value = platform;
 
+      // Get available variants for this platform
+      const availableVariants = getMobileVariants(kbdgenData, platform);
+      yamlAvailableVariants.value = availableVariants;
+
+      // Determine the variant to use
+      let variant = "primary";
+      if (availableVariants.length > 0) {
+        // Use selected variant if available, otherwise use first variant
+        variant = availableVariants.includes(yamlDefaultVariant.value)
+          ? yamlDefaultVariant.value
+          : availableVariants[0];
+        yamlDefaultVariant.value = variant;
+      }
+
       // Transform to layout
       const layout = transformKbdgenToLayout(
         kbdgenData,
         platform,
         "custom",
         "yaml-editor",
+        variant,
       );
 
       // Update or add the layout
@@ -160,6 +197,7 @@ export default function KeyboardViewer(
     } catch (error) {
       yamlError.value = getErrorMessage(error);
       yamlAvailablePlatforms.value = [];
+      yamlAvailableVariants.value = [];
     }
   };
 
@@ -170,6 +208,13 @@ export default function KeyboardViewer(
 
   const handleYamlPlatformChange = (newPlatform: string) => {
     yamlDefaultPlatform.value = newPlatform;
+    // Reset variant to primary when platform changes
+    yamlDefaultVariant.value = "primary";
+    parseAndLoadYaml();
+  };
+
+  const handleYamlVariantChange = (newVariant: string) => {
+    yamlDefaultVariant.value = newVariant;
     parseAndLoadYaml();
   };
 
@@ -210,6 +255,11 @@ export default function KeyboardViewer(
   // Helper: Check if a key is a Ctrl key
   const isCtrlKey = (key: Key): boolean => {
     return key.id === "ControlLeft" || key.id === "ControlRight";
+  };
+
+  // Helper: Check if a key is the mobile symbols key
+  const isSymbolsKey = (key: Key): boolean => {
+    return key.id === "MobileSymbols" || key.id === "MobileSymbols2";
   };
 
   // Helper: Get the character to output based on the active layer
@@ -278,6 +328,32 @@ export default function KeyboardViewer(
       parseAndLoadYaml();
     }
   }, [activeTab.value]);
+
+  // Fetch repos on mount (cached for tab switching)
+  useEffect(() => {
+    async function fetchRepos() {
+      reposLoading.value = true;
+      reposError.value = null;
+      try {
+        const response = await fetch("/api/github/repos");
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({
+            error: response.statusText,
+          }));
+          throw new Error(
+            errorData.error || `Failed to fetch repos (${response.status})`,
+          );
+        }
+        const data = await response.json();
+        repos.value = data;
+      } catch (e) {
+        reposError.value = getErrorMessage(e);
+      } finally {
+        reposLoading.value = false;
+      }
+    }
+    fetchRepos();
+  }, []);
 
   // Handle physical keyboard input
   useEffect(() => {
@@ -374,6 +450,12 @@ export default function KeyboardViewer(
   const handleKeyClick = (key: Key) => {
     // Handle Shift key clicks
     if (isShiftKey(key)) {
+      // In symbols mode, shift toggles between symbols-1 and symbols-2
+      if (isSymbolsActive.value) {
+        isSymbols2Active.value = !isSymbols2Active.value;
+        return;
+      }
+      // Otherwise, normal shift behavior
       isShiftActive.value = !isShiftActive.value;
       shiftClickMode.value = isShiftActive.value;
       return;
@@ -403,6 +485,16 @@ export default function KeyboardViewer(
     if (isCtrlKey(key)) {
       isCtrlActive.value = !isCtrlActive.value;
       ctrlClickMode.value = isCtrlActive.value;
+      return;
+    }
+
+    // Handle mobile symbols key clicks
+    if (isSymbolsKey(key)) {
+      isSymbolsActive.value = !isSymbolsActive.value;
+      // Reset symbols-2 when leaving symbols mode
+      if (!isSymbolsActive.value) {
+        isSymbols2Active.value = false;
+      }
       return;
     }
 
@@ -538,6 +630,8 @@ export default function KeyboardViewer(
           isAltActive={isAltActive.value}
           isCmdActive={isCmdActive.value}
           isCtrlActive={isCtrlActive.value}
+          isSymbolsActive={isSymbolsActive.value}
+          isSymbols2Active={isSymbols2Active.value}
           pendingDeadkey={pendingDeadkey.value}
         />
       </div>
@@ -586,6 +680,9 @@ export default function KeyboardViewer(
           {activeTab.value === "github" && (
             <div>
               <GitHubKeyboardSelector
+                repos={repos.value}
+                reposLoading={reposLoading.value}
+                reposError={reposError.value}
                 onLayoutLoaded={handleGitHubLayoutLoaded}
               />
             </div>
@@ -624,6 +721,40 @@ export default function KeyboardViewer(
                         {platform}
                       </option>
                     ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Variant selector (mobile only) */}
+              {yamlAvailableVariants.value.length > 0 && (
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Select Device Type:
+                  </label>
+                  <select
+                    value={yamlDefaultVariant.value}
+                    onChange={(e) =>
+                      handleYamlVariantChange(
+                        (e.target as HTMLSelectElement).value,
+                      )}
+                    class="w-full p-2 border-2 border-gray-300 rounded font-mono text-sm focus:outline-none focus:border-blue-500"
+                  >
+                    {yamlAvailableVariants.value.map((variant) => {
+                      // Map internal variant names to display names
+                      const displayNames: { [key: string]: string } = {
+                        "primary": "Phone (default)",
+                        "iPad-9in": "iPad (9 inch)",
+                        "iPad-12in": "iPad (12 inch)",
+                        "tablet-600": "Tablet (7-10 inch)",
+                      };
+                      const displayName = displayNames[variant] || variant;
+
+                      return (
+                        <option key={variant} value={variant}>
+                          {displayName}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               )}

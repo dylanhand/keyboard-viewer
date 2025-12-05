@@ -14,6 +14,8 @@ interface KeyboardLayoutProps {
   isAltActive?: boolean;
   isCmdActive?: boolean;
   isCtrlActive?: boolean;
+  isSymbolsActive?: boolean;
+  isSymbols2Active?: boolean;
   pendingDeadkey?: string | null;
 }
 
@@ -27,6 +29,8 @@ export function KeyboardLayout({
   isAltActive,
   isCmdActive,
   isCtrlActive,
+  isSymbolsActive,
+  isSymbols2Active,
   pendingDeadkey
 }: KeyboardLayoutProps) {
   const baseWidth = 3.5; // rem - matches Key component
@@ -106,7 +110,7 @@ export function KeyboardLayout({
         {layout.rows.map((row, rowIndex) => (
           <div
             key={rowIndex}
-            class="flex"
+            class={`flex ${layout.isMobile || rowIndex === layout.rows.length - 1 ? "justify-center" : ""}`}
             style={{
               gap: `${gap}rem`,
               marginLeft: row.offset
@@ -132,6 +136,8 @@ export function KeyboardLayout({
                   isAltActive={isAltActive}
                   isCmdActive={isCmdActive}
                   isCtrlActive={isCtrlActive}
+                  isSymbolsActive={isSymbolsActive}
+                  isSymbols2Active={isSymbols2Active}
                   pendingDeadkey={pendingDeadkey}
                 />
               );
@@ -159,6 +165,8 @@ export function KeyboardLayout({
               isAltActive={isAltActive}
               isCmdActive={isCmdActive}
               isCtrlActive={isCtrlActive}
+              isSymbolsActive={isSymbolsActive}
+              isSymbols2Active={isSymbols2Active}
               pendingDeadkey={pendingDeadkey}
             />
           </div>
