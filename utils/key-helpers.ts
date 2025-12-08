@@ -10,7 +10,7 @@ import {
 } from "../constants/key-ids.ts";
 
 export function isShiftKey(keyId: string): boolean {
-  return SHIFT_KEYS.includes(keyId as any);
+  return SHIFT_KEYS.some((k) => k === keyId);
 }
 
 export function isCapsLockKey(keyId: string): boolean {
@@ -18,19 +18,19 @@ export function isCapsLockKey(keyId: string): boolean {
 }
 
 export function isAltKey(keyId: string): boolean {
-  return ALT_KEYS.includes(keyId as any);
+  return ALT_KEYS.some((k) => k === keyId);
 }
 
 export function isCmdKey(keyId: string): boolean {
-  return CMD_KEYS.includes(keyId as any);
+  return CMD_KEYS.some((k) => k === keyId);
 }
 
 export function isCtrlKey(keyId: string): boolean {
-  return CTRL_KEYS.includes(keyId as any);
+  return CTRL_KEYS.some((k) => k === keyId);
 }
 
 export function isSymbolsKey(keyId: string): boolean {
-  return SYMBOLS_KEYS.includes(keyId as any);
+  return SYMBOLS_KEYS.some((k) => k === keyId);
 }
 
 export function isSymbols2Key(keyId: string): boolean {
