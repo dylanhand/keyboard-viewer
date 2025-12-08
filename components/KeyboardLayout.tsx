@@ -3,6 +3,7 @@ import type {
   KeyboardLayout as LayoutType,
 } from "../types/keyboard-simple.ts";
 import { Key } from "./Key.tsx";
+import { ENTER_KEY } from "../constants/key-ids.ts";
 
 interface KeyboardLayoutProps {
   layout: LayoutType;
@@ -51,7 +52,7 @@ export function KeyboardLayout({
     const numGaps = row.keys.length - 1;
 
     row.keys.forEach((key) => {
-      if (key.id === "Enter" && key.height && key.height > 1) {
+      if (key.id === ENTER_KEY && key.height && key.height > 1) {
         enterKeyRowIndex = rowIndex;
       }
       rowWidth += (key.width ?? 1.0) * baseWidth;
@@ -83,7 +84,7 @@ export function KeyboardLayout({
       // Enter key width is the difference
       const enterWidth = (maxRowWidth - asdfRowWidth - gap) / baseWidth;
       const enterKey = layout.rows[enterKeyRowIndex].keys.find((k) =>
-        k.id === "Enter"
+        k.id === ENTER_KEY
       );
 
       if (enterKey) {
@@ -124,7 +125,7 @@ export function KeyboardLayout({
           >
             {row.keys.map((key) => {
               // Skip ISO Enter in normal flow - it's rendered absolutely below
-              if (key.id === "Enter" && key.height && key.height > 1) {
+              if (key.id === ENTER_KEY && key.height && key.height > 1) {
                 return null;
               }
 

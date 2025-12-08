@@ -35,6 +35,11 @@ import {
   isShiftKey,
   isSymbolsKey,
 } from "../utils/key-helpers.ts";
+import {
+  BACKSPACE_KEY,
+  ENTER_KEY,
+  TAB_KEY,
+} from "../constants/key-ids.ts";
 
 interface KeyboardViewerProps {
   layouts: KeyboardLayout[];
@@ -474,7 +479,7 @@ export default function KeyboardViewer(
     }
 
     // Handle special keys
-    if (key.id === "Backspace") {
+    if (key.id === BACKSPACE_KEY) {
       // If there's a pending deadkey, just cancel it instead of deleting
       if (pendingDeadkey.value !== null) {
         pendingDeadkey.value = null;
@@ -485,7 +490,7 @@ export default function KeyboardViewer(
       return;
     }
 
-    if (key.id === "Enter") {
+    if (key.id === ENTER_KEY) {
       // If there's a pending deadkey, output it first
       if (pendingDeadkey.value !== null) {
         text.value += pendingDeadkey.value;
@@ -496,7 +501,7 @@ export default function KeyboardViewer(
       return;
     }
 
-    if (key.id === "Tab") {
+    if (key.id === TAB_KEY) {
       // If there's a pending deadkey, output it first
       if (pendingDeadkey.value !== null) {
         text.value += pendingDeadkey.value;

@@ -4,6 +4,7 @@ import {
   CAPS_LOCK_KEY,
   CMD_KEYS,
   CTRL_KEYS,
+  MOBILE_SYMBOLS2_KEY,
   SHIFT_KEYS,
   SYMBOLS_KEYS,
 } from "../constants/key-ids.ts";
@@ -33,7 +34,7 @@ export function isSymbolsKey(keyId: string): boolean {
 }
 
 export function isSymbols2Key(keyId: string): boolean {
-  return keyId === "MobileSymbols2";
+  return keyId === MOBILE_SYMBOLS2_KEY;
 }
 
 export function isModifierKey(keyId: string): boolean {
