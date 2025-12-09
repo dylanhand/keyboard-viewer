@@ -5,6 +5,7 @@ import {
   isCapsLockKey,
   isCmdKey,
   isCtrlKey,
+  isFunctionKey,
   isShiftKey,
   isSymbolsKey,
 } from "../utils/key-helpers.ts";
@@ -118,7 +119,11 @@ export function Key(
         isActive ? "key-active" : "bg-white border-gray-300 hover:bg-gray-200"
       }
         ${
-        isIconLabel ? "kbd-icon" : type === "function" ? "text-xs" : "text-sm"
+        isIconLabel
+          ? "kbd-icon"
+          : isFunctionKey(keyData.id)
+          ? "text-xs"
+          : "text-lg"
       }
       `}
       title={keyData.id}

@@ -1,12 +1,15 @@
 import type { Key } from "../types/keyboard-simple.ts";
 import {
   ALT_KEYS,
+  BACKSPACE_KEY,
   CAPS_LOCK_KEY,
   CMD_KEYS,
   CTRL_KEYS,
+  ENTER_KEY,
   MOBILE_SYMBOLS2_KEY,
   SHIFT_KEYS,
   SYMBOLS_KEYS,
+  TAB_KEY,
 } from "../constants/key-ids.ts";
 
 export function isShiftKey(keyId: string): boolean {
@@ -45,6 +48,15 @@ export function isModifierKey(keyId: string): boolean {
     isCmdKey(keyId) ||
     isCtrlKey(keyId) ||
     isSymbolsKey(keyId)
+  );
+}
+
+export function isFunctionKey(keyId: string): boolean {
+  return (
+    isModifierKey(keyId) ||
+    keyId === TAB_KEY ||
+    keyId === ENTER_KEY ||
+    keyId === BACKSPACE_KEY
   );
 }
 
