@@ -7,19 +7,19 @@
     <link href="css/style.css" rel="stylesheet">
   </head>
   <body>
-  <iframe id="keyboard-iframe"
+  <iframe
     src="http://localhost:5173/embed?kbd=sme&layout=se-FI&platform=macOS"
     width="100%"
     frameborder="0">
   </iframe>
 
-  <iframe id="keyboard-iframe"
+  <iframe
     src="http://localhost:5173/embed?kbd=mhr&layout=mhr&platform=macOS"
     width="100%"
     frameborder="0">
   </iframe>
 
-  <iframe id="keyboard-iframe"
+  <iframe
     src="http://localhost:5173/embed?kbd=liv&layout=liv&platform=iOS"
     width="100%"
     frameborder="0">
@@ -28,9 +28,28 @@
   </body>
 
   <script>
+  console.log('Parent script loaded!');
+
   window.addEventListener('message', (event) => {
+    console.log('Received message:', event.data, 'from:', event.source);
+
     if (event.data.type === 'giellalt-keyboard-resize') {
-      document.getElementById('keyboard-iframe').style.height = event.data.height + 'px';
+      // Find the iframe that sent this message
+      const iframes = document.querySelectorAll('iframe');
+      console.log('Looking through', iframes.length, 'iframes');
+      let found = false;
+      for (const iframe of iframes) {
+        console.log('Checking iframe:', iframe.src, 'contentWindow:', iframe.contentWindow, 'event.source:', event.source, 'match:', iframe.contentWindow === event.source);
+        if (iframe.contentWindow === event.source) {
+          console.log('✓ Matched iframe:', iframe.src, 'setting height to:', event.data.height);
+          iframe.style.height = event.data.height + 'px';
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        console.log('✗ No matching iframe found!');
+      }
     }
   });
   </script>
