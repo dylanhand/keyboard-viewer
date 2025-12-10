@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { useEffect } from "preact/hooks";
+import { useEffect, useRef } from "preact/hooks";
 import type { KeyboardLayout } from "../types/keyboard-simple.ts";
 import { KeyboardDisplay } from "../components/KeyboardDisplay.tsx";
 import {
@@ -72,6 +72,11 @@ export default function KeyboardViewer(
       text.value = "";
     },
   });
+
+  // Responsive scaling for main viewer
+  const scale = useSignal<number>(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const keyboardRef = useRef<HTMLDivElement>(null);
 
   const handleGitHubLayoutLoaded = (
     layout: KeyboardLayout,
@@ -209,6 +214,48 @@ export default function KeyboardViewer(
     }
   }, [activeTab.value]);
 
+  // Auto-scale keyboard to fit container width using CSS transform
+  useEffect(() => {
+    if (!containerRef.current || !layout) return;
+
+    const calculateScale = () => {
+      if (!containerRef.current || !keyboardRef.current) {
+        return;
+      }
+
+      const containerWidth = containerRef.current.offsetWidth;
+      const keyboardNaturalWidth = keyboardRef.current.scrollWidth;
+
+      if (keyboardNaturalWidth === 0) {
+        return;
+      }
+
+      // Calculate scale factor to fit keyboard in container
+      // Add small buffer (0.98) to prevent horizontal scrollbar from rounding errors
+      const scaleFactor = (containerWidth / keyboardNaturalWidth) * 0.98;
+
+      // Clamp scale between 0.2 (minimum for small phones) and 1.0 (natural size, don't upscale)
+      const clampedScale = Math.max(0.2, Math.min(scaleFactor, 1.0));
+
+      scale.value = clampedScale;
+    };
+
+    // Initial calculation after keyboard renders
+    requestAnimationFrame(() => {
+      calculateScale();
+    });
+
+    const resizeObserver = new ResizeObserver(() => {
+      calculateScale();
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [layout]);
+
   // Fetch repos on mount (cached for tab switching)
   useEffect(() => {
     async function fetchRepos() {
@@ -344,22 +391,30 @@ export default function KeyboardViewer(
       </div>
 
       {/* Keyboard */}
-      <div class="flex justify-center">
-        <KeyboardDisplay
-          layout={layout}
-          onKeyClick={keyboard.handleKeyClick}
-          pressedKeyId={keyboard.pressedKeyId.value}
-          activeLayer={keyboard.activeLayer.value}
-          isShiftActive={keyboard.isShiftActive.value}
-          isCapsLockActive={keyboard.isCapsLockActive.value}
-          isAltActive={keyboard.isAltActive.value}
-          isCmdActive={keyboard.isCmdActive.value}
-          isCtrlActive={keyboard.isCtrlActive.value}
-          isSymbolsActive={keyboard.isSymbolsActive.value}
-          isSymbols2Active={keyboard.isSymbols2Active.value}
-          pendingDeadkey={keyboard.pendingDeadkey.value}
-          showChrome={true}
-        />
+      <div class="flex justify-center" ref={containerRef}>
+        <div
+          ref={keyboardRef}
+          style={{
+            transform: `scale(${scale.value})`,
+            transformOrigin: "top center",
+          }}
+        >
+          <KeyboardDisplay
+            layout={layout}
+            onKeyClick={keyboard.handleKeyClick}
+            pressedKeyId={keyboard.pressedKeyId.value}
+            activeLayer={keyboard.activeLayer.value}
+            isShiftActive={keyboard.isShiftActive.value}
+            isCapsLockActive={keyboard.isCapsLockActive.value}
+            isAltActive={keyboard.isAltActive.value}
+            isCmdActive={keyboard.isCmdActive.value}
+            isCtrlActive={keyboard.isCtrlActive.value}
+            isSymbolsActive={keyboard.isSymbolsActive.value}
+            isSymbols2Active={keyboard.isSymbols2Active.value}
+            pendingDeadkey={keyboard.pendingDeadkey.value}
+            showChrome={true}
+          />
+        </div>
       </div>
 
       {/* Info */}
