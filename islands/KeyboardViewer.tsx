@@ -312,7 +312,7 @@ export default function KeyboardViewer(
   };
 
   return (
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-8">
       {/* Output text area */}
       <div class="flex justify-center">
         <div class="keyboard-width-container">
@@ -350,7 +350,16 @@ export default function KeyboardViewer(
       </div>
 
       {/* Keyboard */}
-      <div class="flex justify-center" ref={scaling.containerRef}>
+      <div
+        class="flex justify-center"
+        ref={scaling.containerRef}
+        style={{
+          overflow: "visible",
+          height: scaling.scaledHeight.value > 0
+            ? `${scaling.scaledHeight.value}px`
+            : "auto",
+        }}
+      >
         <div
           ref={scaling.keyboardRef}
           style={{
@@ -399,7 +408,7 @@ export default function KeyboardViewer(
       </div>
 
       {/* Tabs */}
-      <div class="flex justify-center">
+      <div class="flex justify-center mt-8">
         <div class="keyboard-width-container">
           <div class="flex gap-2 border-b-2 border-gray-300 mb-4">
             <button
