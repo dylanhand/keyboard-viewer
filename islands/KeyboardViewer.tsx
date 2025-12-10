@@ -312,7 +312,7 @@ export default function KeyboardViewer(
   };
 
   return (
-    <div class="flex flex-col gap-8">
+    <div class="flex flex-col gap-4 md:gap-8">
       {/* Output text area */}
       <div class="flex justify-center">
         <div class="keyboard-width-container">
@@ -325,7 +325,7 @@ export default function KeyboardViewer(
             <textarea
               value={text.value}
               readOnly
-              class="w-full h-32 p-3 pr-10 border-2 border-gray-300 rounded font-mono text-sm resize-y focus:outline-none focus:border-blue-500"
+              class="w-full h-24 md:h-32 p-2 md:p-3 pr-10 border-2 border-gray-300 rounded font-mono text-sm resize-y focus:outline-none focus:border-blue-500"
               placeholder="Click keys below or use your keyboard to type..."
             />
             {text.value && (
@@ -388,7 +388,7 @@ export default function KeyboardViewer(
       {/* Info */}
       <div class="flex justify-center">
         <div class="keyboard-width-container">
-          <div class="flex flex-wrap gap-4 items-center justify-center text-sm text-gray-600">
+          <div class="flex flex-wrap gap-2 md:gap-4 items-center justify-center text-xs md:text-sm text-gray-600">
             <span>
               Layout: <strong>{layout.name}</strong>
             </span>
@@ -413,7 +413,7 @@ export default function KeyboardViewer(
           <div class="flex gap-2 border-b-2 border-gray-300 mb-4">
             <button
               onClick={() => activeTab.value = "github"}
-              class={`px-4 py-2 font-semibold text-sm transition-colors ${
+              class={`px-3 md:px-4 py-2 font-semibold text-xs md:text-sm transition-colors ${
                 activeTab.value === "github"
                   ? "border-b-2 border-blue-500 text-blue-600"
                   : "text-gray-600 hover:text-gray-900"
@@ -423,7 +423,7 @@ export default function KeyboardViewer(
             </button>
             <button
               onClick={() => activeTab.value = "yaml"}
-              class={`px-4 py-2 font-semibold text-sm transition-colors ${
+              class={`px-3 md:px-4 py-2 font-semibold text-xs md:text-sm transition-colors ${
                 activeTab.value === "yaml"
                   ? "border-b-2 border-blue-500 text-blue-600"
                   : "text-gray-600 hover:text-gray-900"
@@ -455,7 +455,7 @@ export default function KeyboardViewer(
                   value={yamlContent.value}
                   onInput={(e) =>
                     handleYamlChange((e.target as HTMLTextAreaElement).value)}
-                  class="w-full h-64 p-3 border-2 border-gray-300 rounded font-mono text-xs resize-y focus:outline-none focus:border-blue-500"
+                  class="w-full h-48 md:h-64 p-2 md:p-3 border-2 border-gray-300 rounded font-mono text-xs resize-y focus:outline-none focus:border-blue-500"
                   placeholder="Paste your kbdgen YAML here..."
                 />
               </div>
@@ -511,13 +511,13 @@ export default function KeyboardViewer(
               )}
 
               {yamlError.value && (
-                <div class="p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+                <div class="p-2 md:p-3 bg-red-100 border border-red-400 text-red-700 rounded text-xs md:text-sm">
                   <strong>Error:</strong> {yamlError.value}
                 </div>
               )}
 
               {!yamlError.value && yamlContent.value && (
-                <div class="p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded text-sm">
+                <div class="p-2 md:p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded text-xs md:text-sm">
                   <strong>Success!</strong>{" "}
                   Layout loaded. Start typing on the keyboard above.
                 </div>
