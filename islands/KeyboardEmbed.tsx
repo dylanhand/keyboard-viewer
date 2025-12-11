@@ -100,6 +100,8 @@ export function KeyboardEmbed({
           transform: `scale(${scaling.scale.value})`,
           transformOrigin: "top left",
           display: "inline-block",
+          opacity: scaling.scaledHeight.value > 0 ? 1 : 0,
+          transition: "opacity 0.2s ease-in-out",
         }}
       >
         <KeyboardDisplay

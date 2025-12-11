@@ -418,6 +418,8 @@ export default function KeyboardViewer(
           style={{
             transform: `scale(${scaling.scale.value})`,
             transformOrigin: "top center",
+            opacity: scaling.scaledHeight.value > 0 ? 1 : 0,
+            transition: "opacity 0.2s ease-in-out",
           }}
         >
           <KeyboardDisplay
