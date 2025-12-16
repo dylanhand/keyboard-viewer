@@ -1,4 +1,4 @@
-import { PageProps } from "$fresh/server.ts";
+import { PageProps } from "fresh";
 import { KeyboardEmbed } from "../islands/KeyboardEmbed.tsx";
 import { parseKeyboardParams } from "../utils/keyboard-params.ts";
 
@@ -12,14 +12,16 @@ export default function EmbedPage({ url }: PageProps) {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Keyboard: {params.kbd} - {params.layout}</title>
-        <style>{`
+        <style>
+          {`
           body {
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: transparent;
           }
-        `}</style>
+        `}
+        </style>
       </head>
       <body>
         <KeyboardEmbed

@@ -22,7 +22,10 @@ export const handler = define.handlers({
 
       while (hasMore) {
         const searchUrl = new URL("https://api.github.com/search/repositories");
-        searchUrl.searchParams.set("q", "org:giellalt keyboard- in:name archived:false");
+        searchUrl.searchParams.set(
+          "q",
+          "org:giellalt keyboard- in:name archived:false",
+        );
         searchUrl.searchParams.set("per_page", "100");
         searchUrl.searchParams.set("page", page.toString());
 
@@ -36,7 +39,8 @@ export const handler = define.handlers({
         allRepos.push(...data.items);
 
         // Check if there are more pages
-        hasMore = data.items.length === 100 && allRepos.length < data.total_count;
+        hasMore = data.items.length === 100 &&
+          allRepos.length < data.total_count;
         page++;
 
         // Safety limit: prevent infinite loops

@@ -2,7 +2,9 @@ import { Head } from "fresh/runtime";
 import { define } from "../utils.ts";
 import KeyboardViewer from "../islands/KeyboardViewer.tsx";
 import type { KeyboardLayout } from "../types/keyboard-simple.ts";
-import defaultLayout from "../data/layouts/iso-qwerty.json" with { type: "json" };
+import defaultLayout from "../data/layouts/iso-qwerty.json" with {
+  type: "json",
+};
 
 export default define.page(function Home() {
   // Use embedded default QWERTY layout

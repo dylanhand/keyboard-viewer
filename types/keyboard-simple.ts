@@ -2,7 +2,7 @@
  * Simplified keyboard types for basic viewer
  */
 
-import type { Platform, DeviceVariant } from "../constants/platforms.ts";
+import type { DeviceVariant, Platform } from "../constants/platforms.ts";
 
 /**
  * All possible keyboard layers across platforms

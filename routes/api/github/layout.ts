@@ -19,8 +19,10 @@ export const handler = define.handlers({
       const url = new URL(req.url);
       const langCode = url.searchParams.get("repo");
       const layoutFile = url.searchParams.get("file");
-      const platform = (url.searchParams.get("platform") as Platform) || DEFAULT_PLATFORM;
-      const variant = (url.searchParams.get("variant") as DeviceVariant) || DEFAULT_VARIANT;
+      const platform = (url.searchParams.get("platform") as Platform) ||
+        DEFAULT_PLATFORM;
+      const variant = (url.searchParams.get("variant") as DeviceVariant) ||
+        DEFAULT_VARIANT;
 
       if (!langCode || !layoutFile) {
         return Response.json(

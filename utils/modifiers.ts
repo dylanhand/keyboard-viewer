@@ -80,14 +80,20 @@ export function getLayerDisplayName(layer: string): string {
   // Convert layer name to display format
   return layer
     .split("+")
-    .map(mod => {
+    .map((mod) => {
       switch (mod) {
-        case "cmd": return "Cmd";
-        case "alt": return "Alt";
-        case "ctrl": return "Ctrl";
-        case "shift": return "Shift";
-        case "caps": return "Caps";
-        default: return mod;
+        case "cmd":
+          return "Cmd";
+        case "alt":
+          return "Alt";
+        case "ctrl":
+          return "Ctrl";
+        case "shift":
+          return "Shift";
+        case "caps":
+          return "Caps";
+        default:
+          return mod;
       }
     })
     .join(" + ");

@@ -3,7 +3,7 @@ import type {
   KeyboardLayout,
   KeyLayers,
 } from "../types/keyboard-simple.ts";
-import { Platform, DeviceVariant } from "../constants/platforms.ts";
+import { DeviceVariant, Platform } from "../constants/platforms.ts";
 
 /**
  * Transforms keyboard layouts from kbdgen format (used by giellalt)
@@ -634,7 +634,8 @@ function transformMobileLayout(
   });
 
   // iPad layouts have a second symbols key instead of Enter
-  const isIPad = variant === DeviceVariant.IPad9in || variant === DeviceVariant.IPad12in;
+  const isIPad = variant === DeviceVariant.IPad9in ||
+    variant === DeviceVariant.IPad12in;
   if (isIPad) {
     bottomRowKeys.push({
       id: "MobileSymbols2",
