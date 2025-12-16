@@ -15,21 +15,39 @@ export const handler = define.handlers({
         headers["Authorization"] = `Bearer ${githubToken}`;
       }
 
-      // Fetch all repos from giellalt organization
-      const response = await fetch(
-        "https://api.github.com/orgs/giellalt/repos?per_page=100",
-        { headers },
-      );
+      // Use Search API to find all keyboard-* repos
+      const allRepos = [];
+      let page = 1;
+      let hasMore = true;
 
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.statusText}`);
+      while (hasMore) {
+        const searchUrl = new URL("https://api.github.com/search/repositories");
+        searchUrl.searchParams.set("q", "org:giellalt keyboard- in:name archived:false");
+        searchUrl.searchParams.set("per_page", "100");
+        searchUrl.searchParams.set("page", page.toString());
+
+        const response = await fetch(searchUrl.toString(), { headers });
+
+        if (!response.ok) {
+          throw new Error(`GitHub API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        allRepos.push(...data.items);
+
+        // Check if there are more pages
+        hasMore = data.items.length === 100 && allRepos.length < data.total_count;
+        page++;
+
+        // Safety limit: prevent infinite loops
+        if (page > 20) {
+          console.warn("Hit pagination safety limit at 20 pages (2000 repos)");
+          break;
+        }
       }
 
-      const repos = await response.json();
-
-      // Filter for keyboard-* repos and extract language codes
-      const keyboardRepos = repos
-        .filter((repo: { name: string }) => repo.name.startsWith("keyboard-"))
+      // Extract language codes (no filter needed - search already did that)
+      const keyboardRepos = allRepos
         .map((repo: { name: string; description: string }) => ({
           code: repo.name.replace("keyboard-", ""),
           name: repo.name,
