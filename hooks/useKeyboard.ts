@@ -1,10 +1,7 @@
 import { useComputed, useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import type { Key, KeyboardLayout } from "../types/keyboard-simple.ts";
-import {
-  getActiveLayer,
-  type ModifierState,
-} from "../utils/modifiers.ts";
+import { getActiveLayer, type ModifierState } from "../utils/modifiers.ts";
 import {
   getKeyOutput,
   isAltKey,
@@ -14,32 +11,12 @@ import {
   isShiftKey,
   isSymbolsKey,
 } from "../utils/key-helpers.ts";
-import {
-  BACKSPACE_KEY,
-  ENTER_KEY,
-  TAB_KEY,
-} from "../constants/key-ids.ts";
+import { BACKSPACE_KEY, ENTER_KEY, TAB_KEY } from "../constants/key-ids.ts";
 
 export interface UseKeyboardOptions {
-  /**
-   * The keyboard layout to use
-   */
   layout: KeyboardLayout | null;
-
-  /**
-   * Optional callback for text output
-   * Called when a key produces output
-   */
   onTextOutput?: (text: string) => void;
-
-  /**
-   * Optional callback for backspace
-   */
   onBackspace?: () => void;
-
-  /**
-   * Optional callback when state is cleared
-   */
   onClear?: () => void;
 }
 
