@@ -243,7 +243,14 @@ export function useKeyboard(options: UseKeyboardOptions): UseKeyboardReturn {
         isSymbols2Active.value = !isSymbols2Active.value;
         return;
       }
-      // Otherwise, normal shift behavior
+      // When shift is clicked while caps lock is active, toggle shift mode
+      // (shift can have different symbols than caps lock)
+      if (isCapsLockActive.value) {
+        isShiftActive.value = !isShiftActive.value;
+        shiftClickMode.value = isShiftActive.value;
+        return;
+      }
+      // Otherwise, normal shift toggle behavior
       isShiftActive.value = !isShiftActive.value;
       shiftClickMode.value = isShiftActive.value;
       return;
@@ -251,6 +258,11 @@ export function useKeyboard(options: UseKeyboardOptions): UseKeyboardReturn {
 
     // Handle Caps Lock key clicks
     if (isCapsLockKey(key.id)) {
+      // When caps lock is clicked while shift is active, deselect shift
+      if (isShiftActive.value) {
+        isShiftActive.value = false;
+        shiftClickMode.value = false;
+      }
       isCapsLockActive.value = !isCapsLockActive.value;
       return;
     }
